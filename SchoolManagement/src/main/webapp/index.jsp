@@ -54,6 +54,8 @@
                         <a href="attendance.jsp" class="list-group-item list-group-item-action">Attendance</a>
                         <a href="result.jsp" class="list-group-item list-group-item-action">Result</a>
                         <a href="classes.jsp" class="list-group-item list-group-item-action">Classes</a>
+                        <a href="timeTable.jsp">Timetable</a>
+                        <a href="classes.jsp">Classes</a>
                     </div>
                 <%
                     } else if (userRId == 1) { // Admin
@@ -63,7 +65,7 @@
                         <a href="session.jsp" class="list-group-item list-group-item-action">Session</a>
                         <a href="manageNotice.jsp" class="list-group-item list-group-item-action">Notice</a>
                         <a href="subject.jsp" class="list-group-item list-group-item-action">Subject</a>
-                        <a href="classes.jsp" class="list-group-item list-group-item-action">Classes</a>
+                        <a href="manageClasses.jsp" class="list-group-item list-group-item-action">Manage Classes</a>
                         <a href="manageTeacher.jsp" class="list-group-item list-group-item-action">Teachers Information</a>
                         <a href="manageStudent.jsp" class="list-group-item list-group-item-action">Students Information</a>
                     </div>

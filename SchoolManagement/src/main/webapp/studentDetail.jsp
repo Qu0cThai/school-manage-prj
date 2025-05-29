@@ -27,11 +27,6 @@
                                             if (rs.next()) {
                                     %>
                                     <form class="form-group" action="" method="">
-                                        <center>
-                                            <img class="img-thumbnail" style="width:200px; height:200px; margin-bottom: 1rem;" 
-                                                 src="resource/images/<%= rs.getString("s_name") %>_<%= rs.getString("roll_no") %>.jpg" 
-                                                 alt="<%= rs.getString("s_name") %> Image"/>
-                                        </center>
                                         <h6 class="modal-title mt-3">Student Name</h6>
                                         <input class="form-control mb-3" type="text" name="s_name" value="<%= rs.getString("s_name") %>" readonly/>
                                         <h6 class="modal-title">Roll No</h6>
