@@ -1,1 +1,1 @@
-# school-manage-prj
+School Management System Project
