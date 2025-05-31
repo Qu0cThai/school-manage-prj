@@ -3,9 +3,33 @@
 <%@ include file="/WEB-INF/jspf/db-connection.jsp"%>
 <%@ page import="java.sql.*" %>
 <%
-    // Restrict access to Admin (r_id=1)
+    // Restrict access to Admin (r_id=1 or r_id=8)
+    String u_id = (String) session.getAttribute("u_id");
+    String u_name = (String) session.getAttribute("u_name");
     Integer userRId = (Integer) session.getAttribute("userRId");
-    if (userRId == null || userRId != 1) {
+
+    // Fetch u_name if not in session
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    if (u_id != null && u_name == null) {
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement("SELECT u_name FROM users WHERE u_id = ?");
+            pstmt.setString(1, u_id);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                u_name = rs.getString("u_name");
+                session.setAttribute("u_name", u_name);
+            }
+        } catch (Exception e) {
+            out.println("<!-- Error fetching u_name: " + e.getMessage() + " -->");
+        } finally {
+            closeResources(conn, pstmt, rs);
+        }
+    }
+
+    if (u_id == null || u_name == null || userRId == null || (userRId != 1 && userRId != 8)) {
         response.sendRedirect("index.jsp");
         return;
     }
@@ -14,7 +38,7 @@
     <!-- Jumbotron -->
     <div class="jumbotron jumbotron-fluid">
         <div class="container">
-            <h1 class="display-4">Manage Notices, <%= username %>!</h1>
+            <h1 class="display-4">Manage Notices, <%= u_name %>!</h1>
             <p class="lead">Add, edit, or delete notices for the notice board.</p>
         </div>
     </div>
@@ -90,12 +114,9 @@
                 </thead>
                 <tbody>
                     <%
-                        Connection conn = null;
-                        PreparedStatement pstmt = null;
-                        ResultSet rs = null;
                         try {
                             conn = getConnection();
-                            String sql = "SELECT n.n_id, n.n_title, n.n_description, n.publish_date, u.u_name " +
+                            String sql = "SELECT n.n_id, n.n_title, n.n_description, n.publish_date, n.created_by, u.u_name " +
                                         "FROM notices n JOIN users u ON n.created_by = u.u_id " +
                                         "ORDER BY n.publish_date DESC";
                             pstmt = conn.prepareStatement(sql);
@@ -106,6 +127,7 @@
                                 String description = rs.getString("n_description");
                                 String publishDate = rs.getString("publish_date");
                                 String createdBy = rs.getString("u_name");
+                                String noticeCreator = rs.getString("created_by"); // Get created_by for comparison
                     %>
                     <tr>
                         <td><%= title %></td>
@@ -113,12 +135,22 @@
                         <td><%= publishDate %></td>
                         <td><%= createdBy %></td>
                         <td>
+                            <%
+                                if (noticeCreator.equals(u_id)) { // Only show buttons for admin's own notices
+                            %>
                             <button class="btn btn-sm btn-warning" onclick="editNotice(<%= n_id %>, '<%= title.replace("'", "\\'") %>', '<%= description != null ? description.replace("'", "\\'") : "" %>', '<%= publishDate %>')">Edit</button>
                             <form action="manageNotice.jsp" method="POST" style="display:inline;">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="n_id" value="<%= n_id %>">
                                 <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this notice?')">Delete</button>
                             </form>
+                            <%
+                                } else {
+                            %>
+                            <span class="text-muted">No actions available</span>
+                            <%
+                                }
+                            %>
                         </td>
                     </tr>
                     <%
@@ -152,22 +184,9 @@
         String action = request.getParameter("action");
         conn = null;
         pstmt = null;
+        rs = null;
         try {
             conn = getConnection();
-            // Get admin's u_id from users table
-            int adminUId = 0;
-            pstmt = conn.prepareStatement("SELECT u_id FROM users WHERE u_name = ? AND r_id = 1");
-            pstmt.setString(1, username);
-            rs = pstmt.executeQuery();
-            if (rs.next()) {
-                adminUId = rs.getInt("u_id");
-            } else {
-                out.println("<p class='text-danger'>Error: Admin user not found.</p>");
-                return;
-            }
-            rs.close();
-            pstmt.close();
-
             if ("add".equals(action)) {
                 String title = request.getParameter("n_title");
                 String description = request.getParameter("n_description");
@@ -176,7 +195,7 @@
                 pstmt.setString(1, title);
                 pstmt.setString(2, description != null && !description.isEmpty() ? description : null);
                 pstmt.setString(3, publishDate);
-                pstmt.setInt(4, adminUId);
+                pstmt.setString(4, u_id);
                 pstmt.executeUpdate();
                 response.sendRedirect("manageNotice.jsp?success=added");
             } else if ("edit".equals(action)) {
@@ -189,19 +208,19 @@
                 pstmt.setString(2, description != null && !description.isEmpty() ? description : null);
                 pstmt.setString(3, publishDate);
                 pstmt.setInt(4, n_id);
-                pstmt.setInt(5, adminUId);
+                pstmt.setString(5, u_id);
                 pstmt.executeUpdate();
                 response.sendRedirect("manageNotice.jsp?success=edited");
             } else if ("delete".equals(action)) {
                 int n_id = Integer.parseInt(request.getParameter("n_id"));
                 pstmt = conn.prepareStatement("DELETE FROM notices WHERE n_id = ? AND created_by = ?");
                 pstmt.setInt(1, n_id);
-                pstmt.setInt(2, adminUId);
+                pstmt.setString(2, u_id);
                 pstmt.executeUpdate();
                 response.sendRedirect("manageNotice.jsp?success=deleted");
             }
         } catch (Exception e) {
-            out.println("<p class='text-danger'>Error processing request: " + e.getMessage() + "</p>");
+            out.println("<div class='alert alert-danger'>Error processing request: " + e.getMessage() + "</div>");
         } finally {
             closeResources(conn, pstmt, rs);
         }
@@ -217,7 +236,7 @@
 <div class="alert alert-success alert-dismissible fade show" role="alert">
     <%= message %>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
+        <span aria-hidden="true">×</span>
     </button>
 </div>
 <% } %>

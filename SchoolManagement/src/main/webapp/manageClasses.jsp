@@ -3,46 +3,65 @@
 <%@ include file="/WEB-INF/jspf/db-connection.jsp"%>
 <%@ page import="java.sql.*" %>
 <%
-    // Restrict access to admins (r_id=1)
+    // Restrict access to teachers (r_id=2)
+    String u_id = (String) session.getAttribute("u_id");
+    String u_name = (String) session.getAttribute("u_name");
     Integer userRId = (Integer) session.getAttribute("userRId");
-    if (userRId == null || username == null || userRId != 1) {
+
+    // Fetch u_name if not in session
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    if (u_id != null && u_name == null) {
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement("SELECT u_name FROM users WHERE u_id = ?");
+            pstmt.setString(1, u_id);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                u_name = rs.getString("u_name");
+                session.setAttribute("u_name", u_name);
+            }
+        } catch (Exception e) {
+            out.println("<!-- Error fetching u_name: " + e.getMessage() + " -->");
+        } finally {
+            closeResources(conn, pstmt, rs);
+        }
+    }
+
+    if (u_id == null || u_name == null || userRId == null || userRId != 2) {
         response.sendRedirect("index.jsp");
         return;
     }
 
     // Handle form submissions and edit form display
     String message = "";
-    Connection conn = null;
-    PreparedStatement pstmt = null;
-    ResultSet rs = null;
-
-    // Check for edit form display
     String action = request.getParameter("action");
     String editClassId = request.getParameter("class_id");
     boolean showEditForm = "edit".equals(action) && editClassId != null;
-    String editSubject = "", editRoom = "", editTeacherName = "", editTimeBegin = "", editTimeEnd = "";
+    String editSubject = "", editRoom = "", editTimeBegin = "", editTimeEnd = "";
     String editDayOfWeek = "", editAcademicSession = "", editSemester = "";
 
     if (showEditForm) {
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(
-                "SELECT c.class_id, c.subject, c.room, t.t_name, c.time_begin, c.time_end, c.day_of_week, c.academic_session, c.semester " +
-                "FROM classes c JOIN teachers t ON c.t_id = t.t_id WHERE c.class_id = ?"
+                "SELECT class_id, subject, room, time_begin, time_end, day_of_week, academic_session, semester " +
+                "FROM classes WHERE class_id = ? AND t_id = ?"
             );
             pstmt.setString(1, editClassId);
+            pstmt.setString(2, u_id);
             rs = pstmt.executeQuery();
             if (rs.next()) {
                 editSubject = rs.getString("subject");
                 editRoom = rs.getString("room");
-                editTeacherName = rs.getString("t_name");
                 editTimeBegin = rs.getString("time_begin");
                 editTimeEnd = rs.getString("time_end");
                 editDayOfWeek = rs.getString("day_of_week");
                 editAcademicSession = rs.getString("academic_session");
                 editSemester = rs.getString("semester");
             } else {
-                message = "<div class='alert alert-danger'>Class ID " + editClassId + " not found.</div>";
+                message = "<div class='alert alert-danger'>Class ID " + editClassId + " not found or you are not authorized.</div>";
                 showEditForm = false;
             }
         } catch (Exception e) {
@@ -62,23 +81,19 @@
                 String classId = request.getParameter("class_id");
                 String subject = request.getParameter("subject");
                 String room = request.getParameter("room");
-                String teacherName = request.getParameter("teacher_name");
                 String timeBegin = request.getParameter("time_begin");
                 String timeEnd = request.getParameter("time_end");
                 String dayOfWeek = request.getParameter("day_of_week");
                 String academicSession = request.getParameter("academic_session");
                 String semester = request.getParameter("semester");
 
-                // Validate teacher name and get t_id
-                String tId = "";
-                pstmt = conn.prepareStatement("SELECT t_id FROM teachers WHERE t_name = ?");
-                pstmt.setString(1, teacherName);
+                // Verify teacher exists
+                pstmt = conn.prepareStatement("SELECT t_id FROM teachers WHERE t_id = ?");
+                pstmt.setString(1, u_id);
                 rs = pstmt.executeQuery();
-                if (rs.next()) {
-                    tId = rs.getString("t_id");
-                } else {
-                    message = "<div class='alert alert-danger'>Teacher name not found: " + teacherName + "</div>";
-                    throw new Exception("Invalid teacher name");
+                if (!rs.next()) {
+                    message = "<div class='alert alert-danger'>Teacher ID " + u_id + " not found.</div>";
+                    throw new Exception("Invalid teacher ID");
                 }
                 rs.close();
                 pstmt.close();
@@ -91,7 +106,7 @@
                 pstmt.setString(1, classId);
                 pstmt.setString(2, subject);
                 pstmt.setString(3, room);
-                pstmt.setString(4, tId);
+                pstmt.setString(4, u_id); // Teacher is the logged-in user
                 pstmt.setString(5, timeBegin);
                 pstmt.setString(6, timeEnd);
                 pstmt.setString(7, academicSession);
@@ -103,69 +118,56 @@
                 String classId = request.getParameter("class_id");
                 String subject = request.getParameter("subject");
                 String room = request.getParameter("room");
-                String teacherName = request.getParameter("teacher_name");
                 String timeBegin = request.getParameter("time_begin");
                 String timeEnd = request.getParameter("time_end");
                 String dayOfWeek = request.getParameter("day_of_week");
                 String academicSession = request.getParameter("academic_session");
                 String semester = request.getParameter("semester");
 
-                // Validate teacher name and get t_id
-                String tId = "";
-                pstmt = conn.prepareStatement("SELECT t_id FROM teachers WHERE t_name = ?");
-                pstmt.setString(1, teacherName);
-                rs = pstmt.executeQuery();
-                if (rs.next()) {
-                    tId = rs.getString("t_id");
-                } else {
-                    message = "<div class='alert alert-danger'>Teacher name not found: " + teacherName + "</div>";
-                    throw new Exception("Invalid teacher name");
-                }
-                rs.close();
-                pstmt.close();
-
                 // Update class
                 pstmt = conn.prepareStatement(
-                    "UPDATE classes SET subject = ?, room = ?, t_id = ?, time_begin = ?, time_end = ?, academic_session = ?, semester = ?, day_of_week = ? " +
-                    "WHERE class_id = ?"
+                    "UPDATE classes SET subject = ?, room = ?, time_begin = ?, time_end = ?, academic_session = ?, semester = ?, day_of_week = ? " +
+                    "WHERE class_id = ? AND t_id = ?"
                 );
                 pstmt.setString(1, subject);
                 pstmt.setString(2, room);
-                pstmt.setString(3, tId);
-                pstmt.setString(4, timeBegin);
-                pstmt.setString(5, timeEnd);
-                pstmt.setString(6, academicSession);
-                pstmt.setInt(7, Integer.parseInt(semester));
-                pstmt.setString(8, dayOfWeek);
-                pstmt.setString(9, classId);
+                pstmt.setString(3, timeBegin);
+                pstmt.setString(4, timeEnd);
+                pstmt.setString(5, academicSession);
+                pstmt.setInt(6, Integer.parseInt(semester));
+                pstmt.setString(7, dayOfWeek);
+                pstmt.setString(8, classId);
+                pstmt.setString(9, u_id); // Restrict to teacher's own classes
                 int rows = pstmt.executeUpdate();
                 if (rows > 0) {
                     message = "<div class='alert alert-success'>Class " + classId + " updated successfully!</div>";
                 } else {
-                    message = "<div class='alert alert-danger'>Class ID " + classId + " not found.</div>";
+                    message = "<div class='alert alert-danger'>Class ID " + classId + " not found or you are not authorized.</div>";
                 }
             } else if ("delete".equals(action)) {
                 String classId = request.getParameter("class_id");
-                // Check if class exists
-                pstmt = conn.prepareStatement("SELECT 1 FROM classes WHERE class_id = ?");
+                // Check if class exists and belongs to teacher
+                pstmt = conn.prepareStatement("SELECT 1 FROM classes WHERE class_id = ? AND t_id = ?");
                 pstmt.setString(1, classId);
+                pstmt.setString(2, u_id);
                 rs = pstmt.executeQuery();
                 if (!rs.next()) {
-                    message = "<div class='alert alert-danger'>Class ID " + classId + " does not exist.</div>";
+                    message = "<div class='alert alert-danger'>Class ID " + classId + " not found or you are not authorized.</div>";
                     throw new Exception("Invalid class");
                 }
                 rs.close();
                 pstmt.close();
 
-                // Delete from student_classes first
+                // Delete from student_classes
                 pstmt = conn.prepareStatement("DELETE FROM student_classes WHERE class_id = ?");
                 pstmt.setString(1, classId);
                 pstmt.executeUpdate();
                 pstmt.close();
 
                 // Delete class
-                pstmt = conn.prepareStatement("DELETE FROM classes WHERE class_id = ?");
+                pstmt = conn.prepareStatement("DELETE FROM classes WHERE class_id = ? AND t_id = ?");
                 pstmt.setString(1, classId);
+                pstmt.setString(2, u_id);
                 pstmt.executeUpdate();
                 message = "<div class='alert alert-success'>Class " + classId + " deleted successfully!</div>";
             }
@@ -182,8 +184,8 @@
     <!-- Jumbotron -->
     <div class="jumbotron jumbotron-fluid">
         <div class="container">
-            <h1 class="display-4">Manage Classes</h1>
-            <p class="lead">Add, edit, or delete classes for the academic session.</p>
+            <h1 class="display-4">Manage Classes, <%= u_name %>!</h1>
+            <p class="lead">Add, edit, or delete your classes for the academic session.</p>
         </div>
     </div>
     <%= message %>
@@ -200,28 +202,6 @@
         <div class="form-group">
             <label>Room</label>
             <input type="text" name="room" class="form-control" value="<%= editRoom %>" required>
-        </div>
-        <div class="form-group">
-            <label>Teacher Name</label>
-            <select name="teacher_name" class="form-control" required>
-                <option value="">Select Teacher</option>
-                <%
-                    try {
-                        conn = getConnection();
-                        pstmt = conn.prepareStatement("SELECT t_name FROM teachers ORDER BY t_name");
-                        rs = pstmt.executeQuery();
-                        while (rs.next()) {
-                            String tName = rs.getString("t_name");
-                            String selected = tName.equals(editTeacherName) ? "selected" : "";
-                            out.println("<option value='" + tName + "' " + selected + ">" + tName + "</option>");
-                        }
-                    } catch (Exception e) {
-                        out.println("<option>Error: " + e.getMessage() + "</option>");
-                    } finally {
-                        closeResources(conn, pstmt, rs);
-                    }
-                %>
-            </select>
         </div>
         <div class="form-group">
             <label>Time Begin</label>
@@ -277,27 +257,6 @@
         <div class="form-group">
             <label>Room</label>
             <input type="text" name="room" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label>Teacher Name</label>
-            <select name="teacher_name" class="form-control" required>
-                <option value="">Select Teacher</option>
-                <%
-                    try {
-                        conn = getConnection();
-                        pstmt = conn.prepareStatement("SELECT t_name FROM teachers ORDER BY t_name");
-                        rs = pstmt.executeQuery();
-                        while (rs.next()) {
-                            String tName = rs.getString("t_name");
-                            out.println("<option value='" + tName + "'>" + tName + "</option>");
-                        }
-                    } catch (Exception e) {
-                        out.println("<option>Error: " + e.getMessage() + "</option>");
-                    } finally {
-                        closeResources(conn, pstmt, rs);
-                    }
-                %>
-            </select>
         </div>
         <div class="form-group">
             <label>Time Begin</label>
@@ -357,12 +316,13 @@
                     try {
                         conn = getConnection();
                         pstmt = conn.prepareStatement(
-                            "SELECT c.class_id, c.subject, c.room, t.t_name, c.time_begin, c.time_end, c.day_of_week, c.academic_session, c.semester " +
+                            "SELECT c.class_id, c.subject, c.room, t.t_name, c.time_begin, c.time_end, c.day_of_week, c.academic_session, c.semester, c.t_id " +
                             "FROM classes c JOIN teachers t ON c.t_id = t.t_id"
                         );
                         rs = pstmt.executeQuery();
                         while (rs.next()) {
                             String classId = rs.getString("class_id");
+                            String tId = rs.getString("t_id");
                             String timeBegin = rs.getString("time_begin").substring(0, 5);
                             String timeEnd = rs.getString("time_end").substring(0, 5);
                             String time = timeBegin + "–" + timeEnd;
@@ -377,12 +337,22 @@
                     <td><%= rs.getString("academic_session") %></td>
                     <td><%= rs.getString("semester") %></td>
                     <td>
+                        <%
+                            if (tId.equals(u_id)) { // Only show buttons for teacher's own classes
+                        %>
                         <a href="manageClasses.jsp?action=edit&class_id=<%= classId %>" class="btn btn-warning btn-sm">Edit</a>
                         <form method="POST" action="manageClasses.jsp" style="display:inline;">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="class_id" value="<%= classId %>">
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete class <%= classId %>?');">Delete</button>
                         </form>
+                        <%
+                            } else {
+                        %>
+                        <span class="text-muted">No actions available</span>
+                        <%
+                            }
+                        %>
                     </td>
                 </tr>
                 <%

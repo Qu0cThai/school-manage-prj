@@ -2,126 +2,182 @@
 <%@ include file="header.jsp"%>
 <%@ include file="/WEB-INF/jspf/db-connection.jsp"%>
 <%@ page import="java.sql.*" %>
-<div class="container">
+<style>
+    .jumbotron {
+        background: linear-gradient(135deg, #4facfe, #00f2fe);
+        color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+    }
+    .list-group-item {
+        background: #f8f9fa;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .list-group-item:hover {
+        background: linear-gradient(90deg, #4facfe, #00f2fe);
+        color: white !important;
+        transform: translateX(5px);
+    }
+    .sidebar {
+        background: linear-gradient(180deg, #e0f7fa, #b2ebf2);
+        border-radius: 10px;
+        padding: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .notice-board {
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        animation: fadeIn 1s ease-in;
+    }
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    .btn-secondary {
+        background: linear-gradient(90deg, #ff7e5f, #feb47b);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+        background: linear-gradient(90deg, #feb47b, #ff7e5f);
+        transform: scale(1.05);
+    }
+    i {
+        color: #4facfe;
+    }
+    .list-group-item:hover i {
+        color: white;
+    }
+</style>
+<div class="container mt-4">
     <!-- Debug Output -->
-    <%
-        Integer userRId = (Integer) session.getAttribute("userRId");
+    <%        Integer userRId = (Integer) session.getAttribute("userRId");
         out.println("<!-- Debug: userRId = " + (userRId != null ? userRId : "null") + ", username = " + (username != null ? username : "null") + " -->");
     %>
-    <!-- Jumbotron -->
-    <div class="jumbotron jumbotron-fluid">
-        <div class="container">
-            <h1 class="display-4">Welcome<%= username != null ? ", " + username : "" %>..</h1>
-            <p class="lead">This is a modified jumbotron that occupies the entire horizontal space of its parent.</p>
-        </div>
-    </div>
     <!-- Body -->
     <div class="row">
-        <!-- Sidebar for Teacher or Admin -->
+        <!-- Sidebar for Admin, Teacher, or Student -->
         <%
-            if (userRId != null && (userRId == 1 || userRId == 2)) {
+            if (userRId != null && (userRId == 1 || userRId == 2 || userRId == 3)) {
                 try {
         %>
-            <div class="col-12 col-md-3">
+        <div class="col-12 col-md-3 mb-4">
+            <div class="sidebar">
                 <%
-                    if (userRId == 2) { // Teacher
-                        Connection conn = null;
-                        Statement stmt = null;
-                        ResultSet rs = null;
-                        int totalStudents = 0, totalTeachers = 0, totalEmployees = 0;
-                        try {
-                            conn = getConnection();
-                            stmt = conn.createStatement();
-                            // Count students
-                            rs = stmt.executeQuery("SELECT COUNT(*) AS count FROM students");
-                            if (rs.next()) totalStudents = rs.getInt("count");
-                            rs.close();
-                            // Count teachers
-                            rs = stmt.executeQuery("SELECT COUNT(*) AS count FROM teachers");
-                            if (rs.next()) totalTeachers = rs.getInt("count");
-                            rs.close();
-                            // Count employees (users who are not students or teachers)
-                            rs = stmt.executeQuery("SELECT COUNT(*) AS count FROM users WHERE r_id NOT IN (2, 3)");
-                            if (rs.next()) totalEmployees = rs.getInt("count");
-                        } catch (Exception e) {
-                            out.println("<p>Error fetching counts: " + e.getMessage() + "</p>");
-                        } finally {
-                            closeResources(conn, stmt, rs);
-                        }
+                    if (userRId == 1) { // Admin
                 %>
-                    <!-- Teacher Sidebar -->
-                    <div class="list-group">
-                        <a href="attendance.jsp" class="list-group-item list-group-item-action">Attendance</a>
-                        <a href="result.jsp" class="list-group-item list-group-item-action">Result</a>
-                        <a href="classes.jsp" class="list-group-item list-group-item-action">Classes</a>
-                        <a href="timeTable.jsp">Timetable</a>
-                        <a href="classes.jsp">Classes</a>
-                    </div>
+                <h3 class="text-primary">Admin Dashboard</h3>
+                <div class="list-group">
+                    <a href="manageNotice.jsp" class="list-group-item list-group-item-action"><i class="fas fa-bell me-2"></i>Manage Notice</a>
+                    <a href="classes.jsp" class="list-group-item list-group-item-action"><i class="fas fa-user-graduate me-2"></i>Classes</a>
+                    <a href="teacherInformation.jsp" class="list-group-item list-group-item-action"><i class="fas fa-user-tie me-2"></i>Teachers Information</a>
+                    <a href="studentInformation.jsp" class="list-group-item list-group-item-action"><i class="fas fa-user-graduate me-2"></i>Students Information</a>         
+                </div>
                 <%
-                    } else if (userRId == 1) { // Admin
-                %>
-                    <!-- Admin Sidebar -->
-                    <div class="list-group">
-                        <a href="session.jsp" class="list-group-item list-group-item-action">Session</a>
-                        <a href="manageNotice.jsp" class="list-group-item list-group-item-action">Notice</a>
-                        <a href="subject.jsp" class="list-group-item list-group-item-action">Subject</a>
-                        <a href="manageClasses.jsp" class="list-group-item list-group-item-action">Manage Classes</a>
-                        <a href="manageTeacher.jsp" class="list-group-item list-group-item-action">Teachers Information</a>
-                        <a href="manageStudent.jsp" class="list-group-item list-group-item-action">Students Information</a>
-                    </div>
-                <%
-                    }
-                %>
-            </div>
-        <%
-                } catch (Exception e) {
-                    out.println("<p>Error rendering sidebar: " + e.getMessage() + "</p>");
-                }
-            } else {
-                out.println("<!-- Debug: No sidebar shown, userRId is " + (userRId != null ? userRId : "null") + " -->");
-            }
-        %>
-        <!-- Notice Board -->
-        <div class="<%= (userRId == null || userRId == 3) ? "col-12 col-md-12" : "col-12 col-md-9" %>">
-            <button type="button" class="btn btn-secondary btn-lg btn-block">Notice Board</button>
-            <div class="list-group">
-                <%
+                } else if (userRId == 2) { // Teacher
                     Connection conn = null;
                     Statement stmt = null;
                     ResultSet rs = null;
+                    int totalStudents = 0, totalTeachers = 0, totalEmployees = 0;
                     try {
                         conn = getConnection();
                         stmt = conn.createStatement();
-                        String sql = "SELECT n.n_title, n.n_description, n.publish_date, u.u_name " +
-                                    "FROM notices n JOIN users u ON n.created_by = u.u_id " +
-                                    "ORDER BY n.publish_date DESC LIMIT 3";
-                        rs = stmt.executeQuery(sql);
-                        while (rs.next()) {
-                            String title = rs.getString("n_title");
-                            String description = rs.getString("n_description");
-                            String publishDate = rs.getString("publish_date");
-                            String createdBy = rs.getString("u_name");
-                %>
-                <a class="list-group-item list-group-item-action">
-                    <div>
-                        <h4>⇛ <%= title %></h4>
-                        Description: <%= description != null ? description : "No description available" %><br/>
-                        <small>Publish Date: <%= publishDate %> | Posted by: <%= createdBy %></small>
-                    </div>
-                </a>
-                <%
+                        rs = stmt.executeQuery("SELECT COUNT(*) AS count FROM students");
+                        if (rs.next()) {
+                            totalStudents = rs.getInt("count");
+                        }
+                        rs.close();
+                        rs = stmt.executeQuery("SELECT COUNT(*) AS count FROM teachers");
+                        if (rs.next()) {
+                            totalTeachers = rs.getInt("count");
+                        }
+                        rs.close();
+                        rs = stmt.executeQuery("SELECT COUNT(*) AS count FROM users WHERE r_id NOT IN (2, 3)");
+                        if (rs.next()) {
+                            totalEmployees = rs.getInt("count");
                         }
                     } catch (Exception e) {
-                        out.println("<p>Error fetching notices: " + e.getMessage() + "</p>");
+                        out.println("<p>Error fetching counts: " + e.getMessage() + "</p>");
                     } finally {
                         closeResources(conn, stmt, rs);
                     }
                 %>
-                <a class="list-group-item list-group-item-action" href="noticeBoard.jsp">
-                    <div>
-                        <small style="padding-left:120px">See More..</small>
-                    </div>
-                </a>
+                <h3 class="text-success">Teacher Dashboard</h3>
+                <div class="list-group">
+                    <a href="manageClasses.jsp" class="list-group-item list-group-item-action"><i class="fas fa-chalkboard me-2"></i>Manage Classes</a>
+                    <a href="timeTable.jsp" class="list-group-item list-group-item-action"><i class="fas fa-calendar-alt me-2"></i>Timetable</a>
+                    <a href="teacherInformation.jsp" class="list-group-item list-group-item-action"><i class="fas fa-user-tie me-2"></i>Teachers Information</a>
+                    <a href="studentInformation.jsp" class="list-group-item list-group-item-action"><i class="fas fa-user-graduate me-2"></i>Students Information</a>                            
+                </div>
+                <%
+                } else if (userRId == 3) { // Student
+                %>
+                <h3 class="text-info">Student Dashboard</h3>
+                <div class="list-group">
+                    <a href="classes.jsp" class="list-group-item list-group-item-action"><i class="fas fa-chalkboard me-2"></i>Classes</a>
+                    <a href="timeTable.jsp" class="list-group-item list-group-item-action"><i class="fas fa-calendar-alt me-2"></i>Timetable</a>
+                    <a href="teacherInformation.jsp" class="list-group-item list-group-item-action"><i class="fas fa-user-tie me-2"></i>Teachers Information</a>
+                    <a href="studentInformation.jsp" class="list-group-item list-group-item-action"><i class="fas fa-user-graduate me-2"></i>Students Information</a> 
+                </div>
+                <%
+                    }
+                %>
+            </div>
+        </div>
+        <%
+                } catch (Exception e) {
+                    out.println("<p>Error rendering sidebar: " + e.getMessage() + "</p>");
+                }
+            }
+        %>
+        <!-- Notice Board -->
+        <div class="<%= (userRId == null) ? "col-12 col-md-12" : "col-12 col-md-9"%>">
+            <div class="notice-board">
+                <button type="button" class="btn btn-secondary btn-lg btn-block">Notice Board</button>
+                <div class="list-group mt-3">
+                    <%
+                        Connection conn = null;
+                        Statement stmt = null;
+                        ResultSet rs = null;
+                        try {
+                            conn = getConnection();
+                            stmt = conn.createStatement();
+                            String sql = "SELECT n.n_title, n.n_description, n.publish_date, u.u_name "
+                                    + "FROM notices n JOIN users u ON n.created_by = u.u_id "
+                                    + "ORDER BY n.publish_date DESC LIMIT 3";
+                            rs = stmt.executeQuery(sql);
+                            while (rs.next()) {
+                                String title = rs.getString("n_title");
+                                String description = rs.getString("n_description");
+                                String publishDate = rs.getString("publish_date");
+                                String createdBy = rs.getString("u_name");
+                    %>
+                    <a class="list-group-item list-group-item-action">
+                        <div>
+                            <h4 class="text-primary">⇛ <%= title%></h4>
+                            <p class="text-muted">Description: <%= description != null ? description : "No description available"%></p>
+                            <small class="text-secondary">Publish Date: <%= publishDate%> | Posted by: <%= createdBy%></small>
+                        </div>
+                    </a>
+                    <%
+                            }
+                        } catch (Exception e) {
+                            out.println("<p class='text-danger'>Error fetching notices: " + e.getMessage() + "</p>");
+                        } finally {
+                            closeResources(conn, stmt, rs);
+                        }
+                    %>
+                    <a class="list-group-item list-group-item-action text-center" href="noticeBoard.jsp">
+                        <small class="list-group-item list-group-item-action" style="padding-left:0">See More..</small>
+                    </a>
+                </div>
             </div>
         </div>
     </div>

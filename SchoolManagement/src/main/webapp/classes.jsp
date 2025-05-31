@@ -4,28 +4,47 @@
 <%@ page import="java.sql.*" %>
 <%
     // Get user info
+    String u_id = (String) session.getAttribute("u_id");
+    String u_name = (String) session.getAttribute("u_name");
     Integer userRId = (Integer) session.getAttribute("userRId");
-    if (userRId == null || username == null) {
+
+    // Fetch u_name if not in session
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    if (u_id != null && u_name == null) {
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement("SELECT u_name FROM users WHERE u_id = ?");
+            pstmt.setString(1, u_id);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                u_name = rs.getString("u_name");
+                session.setAttribute("u_name", u_name);
+            }
+        } catch (Exception e) {
+            out.println("<div class='alert alert-danger'>Error fetching username: " + e.getMessage() + "</div>");
+        } finally {
+            closeResources(conn, pstmt, rs);
+        }
+    }
+
+    if (u_id == null || u_name == null || userRId == null) {
         response.sendRedirect("login.jsp");
         return;
     }
 
     // Get s_id for students
-    String userId = "";
-    Connection conn = null;
-    PreparedStatement pstmt = null;
-    ResultSet rs = null;
+    String userId = u_id;
     if (userRId == 3) {
         try {
             conn = getConnection();
-            pstmt = conn.prepareStatement("SELECT u_id FROM users WHERE LOWER(u_name) = LOWER(?) AND r_id = ?");
-            pstmt.setString(1, username);
+            pstmt = conn.prepareStatement("SELECT u_id FROM users WHERE u_id = ? AND r_id = ?");
+            pstmt.setString(1, u_id);
             pstmt.setInt(2, userRId);
             rs = pstmt.executeQuery();
-            if (rs.next()) {
-                userId = rs.getString("u_id");
-            } else {
-                out.println("<div class='alert alert-danger'>Error: User ID not found for username " + username + "</div>");
+            if (!rs.next()) {
+                out.println("<div class='alert alert-danger'>Error: User ID not found for user " + u_name + "</div>");
                 return;
             }
         } catch (Exception e) {
@@ -63,6 +82,32 @@
                 if (rs.next()) {
                     message = "<div class='alert alert-warning'>You are already registered for class " + classId + ".</div>";
                     throw new Exception("Already registered");
+                }
+                rs.close();
+                pstmt.close();
+
+                // Check for time conflict
+                pstmt = conn.prepareStatement(
+                    "SELECT 1 " +
+                    "FROM student_classes sc " +
+                    "JOIN classes c ON sc.class_id = c.class_id " +
+                    "WHERE sc.s_id = ? " +
+                    "AND c.day_of_week = (SELECT day_of_week FROM classes WHERE class_id = ?) " +
+                    "AND c.semester = (SELECT semester FROM classes WHERE class_id = ?) " +
+                    "AND c.academic_session = (SELECT academic_session FROM classes WHERE class_id = ?) " +
+                    "AND c.time_begin < (SELECT time_end FROM classes WHERE class_id = ?) " +
+                    "AND c.time_end > (SELECT time_begin FROM classes WHERE class_id = ?)"
+                );
+                pstmt.setString(1, userId);
+                pstmt.setString(2, classId);
+                pstmt.setString(3, classId);
+                pstmt.setString(4, classId);
+                pstmt.setString(5, classId);
+                pstmt.setString(6, classId);
+                rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    message = "<div class='alert alert-danger'>Time conflict with another registered class.</div>";
+                    throw new Exception("Time conflict");
                 }
                 rs.close();
                 pstmt.close();
@@ -133,8 +178,8 @@
                         rs = pstmt.executeQuery();
                         while (rs.next()) {
                             String classId = rs.getString("class_id");
-                            String timeBegin = rs.getString("time_begin").substring(0, 5); // Format 08:00
-                            String timeEnd = rs.getString("time_end").substring(0, 5);   // Format 20:00
+                            String timeBegin = rs.getString("time_begin").substring(0, 5);
+                            String timeEnd = rs.getString("time_end").substring(0, 5);
                             String time = timeBegin + "–" + timeEnd;
                             boolean isRegistered = false;
                             if (userRId == 3) {
