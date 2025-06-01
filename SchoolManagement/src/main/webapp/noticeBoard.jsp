@@ -23,10 +23,6 @@
         background: linear-gradient(90deg, #feb47b, #ff7e5f);
         transform: scale(1.05);
     }
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
 </style>
 <div class="container mt-4">
     <div class="notice-board">

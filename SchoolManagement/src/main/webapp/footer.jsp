@@ -7,10 +7,6 @@
             <a href="aboutus.jsp" class="text-info mx-2" style="text-decoration: none; transition: all 0.3s ease;">
                 <i class="fas fa-info-circle me-1"></i>About Us
             </a>
-            <span>|</span>
-            <a href="help.jsp" class="text-info mx-2" style="text-decoration: none; transition: all 0.3s ease;">
-                <i class="fas fa-question-circle me-1"></i>Help
-            </a>
         </div>
     </div>
 </footer>

@@ -75,10 +75,6 @@
         border-radius: 8px;
         text-align: center;
     }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
 </style>
 <div class="container">
     <div class="table-container">
@@ -106,7 +102,7 @@
                             conn = getConnection();
                             pstmt = conn.prepareStatement("SELECT t_id, t_name, t_email, phone_number, address FROM teachers");
                             rs = pstmt.executeQuery();
-                            if (!rs.isBeforeFirst()) { // Check if ResultSet is empty
+                            if (!rs.isBeforeFirst()) {
                     %>
                     <tr>
                         <td colspan="5" class="text-muted text-center">No teachers found.</td>

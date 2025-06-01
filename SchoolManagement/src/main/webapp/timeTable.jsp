@@ -3,12 +3,10 @@
 <%@ include file="/WEB-INF/jspf/db-connection.jsp"%>
 <%@ page import="java.sql.*, java.time.*, java.util.*" %>
 <%
-    // Restrict access to logged-in users (r_id=1, 2, 3)
     String u_id = (String) session.getAttribute("u_id");
     String u_name = (String) session.getAttribute("u_name");
     Integer userRId = (Integer) session.getAttribute("userRId");
 
-    // Fetch u_name if not in session
     Connection conn = null;
     PreparedStatement pstmt = null;
     ResultSet rs = null;
@@ -34,7 +32,6 @@
         return;
     }
 
-    // Get user's u_id (matches t_id for r_id=2, s_id for r_id=3)
     String userId = u_id;
     try {
         conn = getConnection();
@@ -53,18 +50,10 @@
         closeResources(conn, pstmt, rs);
     }
 
-    // Get filter parameters
     String selectedSession = request.getParameter("academic_session");
     String selectedSemester = request.getParameter("semester");
 %>
 <style>
-    .jumbotron {
-        background: linear-gradient(135deg, #4facfe, #00f2fe);
-        color: white;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        border-radius: 10px;
-        margin-bottom: 2rem;
-    }
     h3 {
         color: #4facfe;
         text-align: center;
@@ -129,11 +118,20 @@
         text-align: center;
     }
     .filter-form {
-        margin-bottom: 1.5rem;
+        background: #ffffff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease;
+        margin-bottom: 20px;
     }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
+    .form-group label {
+        color: #495057;
+        font-weight: bold;
+    }
+    .btn-primary {
+        background: #4facfe;
+        border: none;
     }
 </style>
 <div class="container mt-4">
@@ -141,17 +139,6 @@
     <%
         out.println("<!-- Debug: userRId = " + (userRId != null ? userRId : "null") + ", u_name = " + (u_name != null ? u_name : "null") + ", userId = " + userId + " -->");
     %>
-    <!-- Jumbotron -->
-    <div class="jumbotron jumbotron-fluid p-4">
-        <div class="container">
-            <h1 class="display-4">Your Timetable, <%= u_name %>!</h1>
-            <p class="lead">
-                <% if (userRId == 1) { %>View all classes<% } %>
-                <% if (userRId == 2) { %>View your teaching schedule<% } %>
-                <% if (userRId == 3) { %>View your registered classes<% } %>
-            </p>
-        </div>
-    </div>
     <!-- Filter Form -->
     <div class="row">
         <div class="col-12">
@@ -227,17 +214,14 @@
                                 String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
                                 int startHour = 7;
                                 int endHour = 22;
-                                // Map to store classes for each day and time slot
                                 Map<String, List<Map<String, String>>> timetable = new HashMap<>();
                                 Map<String, Set<Integer>> occupiedSlots = new HashMap<>();
 
-                                // Initialize maps
                                 for (String day : days) {
                                     timetable.put(day, new ArrayList<>());
                                     occupiedSlots.put(day, new HashSet<>());
                                 }
 
-                                // Fetch classes for the user with filters
                                 String sql = "";
                                 List<String> params = new ArrayList<>();
                                 if (userRId == 1) {
@@ -250,7 +234,6 @@
                                     params.add(userId);
                                 }
 
-                                // Add filter conditions
                                 if (selectedSession != null && !selectedSession.isEmpty()) {
                                     sql += " AND academic_session = ?";
                                     params.add(selectedSession);
@@ -287,7 +270,6 @@
                                     closeResources(conn, pstmt, rs);
                                 }
 
-                                // Render the timetable
                                 for (int hour = startHour; hour <= endHour; hour++) {
                                     String timeSlot = String.format("%02d:00", hour);
                             %>
@@ -297,10 +279,9 @@
                                     for (String day : days) {
                                         boolean slotOccupied = occupiedSlots.get(day).contains(hour);
                                         if (slotOccupied) {
-                                            continue; // Skip this slot if it's already occupied by a rowspan
+                                            continue;
                                         }
 
-                                        // Find a class that starts at this hour
                                         Map<String, String> currentClass = null;
                                         for (Map<String, String> classDetails : timetable.get(day)) {
                                             String timeBegin = classDetails.get("time_begin");
@@ -316,17 +297,14 @@
                                             String subject = currentClass.get("subject");
                                             String room = currentClass.get("room");
 
-                                            // Calculate rowspan
                                             int beginHour = Integer.parseInt(timeBegin.split(":")[0]);
                                             int endHourForClass = Integer.parseInt(timeEnd.split(":")[0]);
                                             int rowspan = endHourForClass - beginHour + 1;
 
-                                            // Mark slots as occupied
                                             for (int h = beginHour; h <= endHourForClass; h++) {
                                                 occupiedSlots.get(day).add(h);
                                             }
 
-                                            // Determine cell class based on user role
                                             String cellClass = "";
                                             if (userRId == 1) {
                                                 cellClass = "class-cell-admin";
@@ -344,7 +322,6 @@
                                 </td>
                                 <%
                                         } else {
-                                            // Empty slot
                                 %>
                                 <td></td>
                                 <%

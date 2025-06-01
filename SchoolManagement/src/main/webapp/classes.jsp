@@ -3,12 +3,10 @@
 <%@ include file="/WEB-INF/jspf/db-connection.jsp"%>
 <%@ page import="java.sql.*" %>
 <%
-    // Get user info
     String u_id = (String) session.getAttribute("u_id");
     String u_name = (String) session.getAttribute("u_name");
     Integer userRId = (Integer) session.getAttribute("userRId");
 
-    // Fetch u_name if not in session
     Connection conn = null;
     PreparedStatement pstmt = null;
     ResultSet rs = null;
@@ -23,7 +21,7 @@
                 session.setAttribute("u_name", u_name);
             }
         } catch (Exception e) {
-            out.println("<div class='alert alert-danger'>Error fetching username: " + e.getMessage() + "</div>");
+            out.println("<div class='alert alert-danger text-center'>Error fetching username: " + e.getMessage() + "</div>");
         } finally {
             closeResources(conn, pstmt, rs);
         }
@@ -34,7 +32,6 @@
         return;
     }
 
-    // Get s_id for students
     String userId = u_id;
     if (userRId == 3) {
         try {
@@ -44,18 +41,17 @@
             pstmt.setInt(2, userRId);
             rs = pstmt.executeQuery();
             if (!rs.next()) {
-                out.println("<div class='alert alert-danger'>Error: User ID not found for user " + u_name + "</div>");
+                out.println("<div class='alert alert-danger text-center'>Error: User ID not found for user " + u_name + "</div>");
                 return;
             }
         } catch (Exception e) {
-            out.println("<div class='alert alert-danger'>Error fetching user ID: " + e.getMessage() + "</div>");
+            out.println("<div class='alert alert-danger text-center'>Error fetching user ID: " + e.getMessage() + "</div>");
             return;
         } finally {
             closeResources(conn, pstmt, rs);
         }
     }
 
-    // Handle registration or drop
     String message = "";
     if ("POST".equalsIgnoreCase(request.getMethod()) && userRId == 3) {
         String classId = request.getParameter("class_id");
@@ -63,30 +59,27 @@
         try {
             conn = getConnection();
             if ("register".equals(action)) {
-                // Check if class exists
                 pstmt = conn.prepareStatement("SELECT 1 FROM classes WHERE class_id = ?");
                 pstmt.setString(1, classId);
                 rs = pstmt.executeQuery();
                 if (!rs.next()) {
-                    message = "<div class='alert alert-danger'>Class ID " + classId + " does not exist.</div>";
+                    message = "<div class='alert alert-danger text-center'>Class ID " + classId + " does not exist.</div>";
                     throw new Exception("Invalid class");
                 }
                 rs.close();
                 pstmt.close();
 
-                // Check if already registered
                 pstmt = conn.prepareStatement("SELECT 1 FROM student_classes WHERE s_id = ? AND class_id = ?");
                 pstmt.setString(1, userId);
                 pstmt.setString(2, classId);
                 rs = pstmt.executeQuery();
                 if (rs.next()) {
-                    message = "<div class='alert alert-warning'>You are already registered for class " + classId + ".</div>";
+                    message = "<div class='alert alert-warning text-center'>You are already registered for class " + classId + ".</div>";
                     throw new Exception("Already registered");
                 }
                 rs.close();
                 pstmt.close();
 
-                // Check for time conflict
                 pstmt = conn.prepareStatement(
                     "SELECT 1 " +
                     "FROM student_classes sc " +
@@ -106,131 +99,258 @@
                 pstmt.setString(6, classId);
                 rs = pstmt.executeQuery();
                 if (rs.next()) {
-                    message = "<div class='alert alert-danger'>Time conflict with another registered class.</div>";
+                    message = "<div class='alert alert-danger text-center'>Time conflict with another registered class.</div>";
                     throw new Exception("Time conflict");
                 }
                 rs.close();
                 pstmt.close();
 
-                // Register student
                 pstmt = conn.prepareStatement("INSERT INTO student_classes (s_id, class_id) VALUES (?, ?)");
                 pstmt.setString(1, userId);
                 pstmt.setString(2, classId);
                 pstmt.executeUpdate();
-                message = "<div class='alert alert-success'>Successfully registered for class " + classId + "!</div>";
+                message = "<div class='alert alert-success text-center'>Successfully registered for class " + classId + "!</div>";
             } else if ("drop".equals(action)) {
-                // Check if registered
                 pstmt = conn.prepareStatement("SELECT 1 FROM student_classes WHERE s_id = ? AND class_id = ?");
                 pstmt.setString(1, userId);
                 pstmt.setString(2, classId);
                 rs = pstmt.executeQuery();
                 if (!rs.next()) {
-                    message = "<div class='alert alert-warning'>You are not registered for class " + classId + ".</div>";
+                    message = "<div class='alert alert-warning text-center'>You are not registered for class " + classId + ".</div>";
                     throw new Exception("Not registered");
                 }
                 rs.close();
                 pstmt.close();
 
-                // Drop class
                 pstmt = conn.prepareStatement("DELETE FROM student_classes WHERE s_id = ? AND class_id = ?");
                 pstmt.setString(1, userId);
                 pstmt.setString(2, classId);
                 pstmt.executeUpdate();
-                message = "<div class='alert alert-success'>Successfully dropped class " + classId + ".</div>";
+                message = "<div class='alert alert-success text-center'>Successfully dropped class " + classId + ".</div>";
             }
         } catch (Exception e) {
             if (message.isEmpty()) {
-                message = "<div class='alert alert-danger'>Error processing request: " + e.getMessage() + "</div>";
+                message = "<div class='alert alert-danger text-center'>Error processing request: " + e.getMessage() + "</div>";
             }
         } finally {
             closeResources(conn, pstmt, rs);
         }
     }
+        String selectedSession = request.getParameter("academic_session");
+
 %>
-<div class="container">
-    <h1>Classes</h1>
-    <%= message %>
-    <div class="table-responsive">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Class ID</th>
-                    <th>Subject</th>
-                    <th>Room</th>
-                    <th>Teacher</th>
-                    <th>Time</th>
-                    <th>Day</th>
-                    <th>Session</th>
-                    <th>Semester</th>
-                    <% if (userRId == 3) { %>
-                    <th>Action</th>
-                    <% } %>
-                </tr>
-            </thead>
-            <tbody>
+<style>
+    h3 {
+        color: #4facfe;
+        margin-top: 2rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    .table-container {
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        padding: 2rem;
+        animation: fadeIn 1s ease-in;
+        margin-bottom: 2rem;
+    }
+    .btn-secondary {
+        background: linear-gradient(90deg, #ff7e5f, #feb47b);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+        background: linear-gradient(90deg, #feb47b, #ff7e5f);
+        transform: scale(1.05);
+    }
+    .table {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .table thead th {
+        background: #4facfe;
+        color: white;
+        text-align: center;
+        cursor: pointer;
+    }
+</style>
+<div class="container mt-4">
+    <div class="table-container">
+        <h3>Available Classes</h3>
+        <div class="mb-3">
+            <label for="filterDay" class="form-label">Filter by Day:</label>
+            <select id="filterDay" class="form-control d-inline-block w-auto">
+                <option value="">All Days</option>
                 <%
-                    try {
-                        conn = getConnection();
-                        pstmt = conn.prepareStatement(
-                            "SELECT c.class_id, c.subject, c.room, t.t_name, c.time_begin, c.time_end, c.day_of_week, c.academic_session, c.semester " +
-                            "FROM classes c JOIN teachers t ON c.t_id = t.t_id"
-                        );
-                        rs = pstmt.executeQuery();
-                        while (rs.next()) {
-                            String classId = rs.getString("class_id");
-                            String timeBegin = rs.getString("time_begin").substring(0, 5);
-                            String timeEnd = rs.getString("time_end").substring(0, 5);
-                            String time = timeBegin + "–" + timeEnd;
-                            boolean isRegistered = false;
-                            if (userRId == 3) {
-                                PreparedStatement checkStmt = conn.prepareStatement(
-                                    "SELECT 1 FROM student_classes WHERE s_id = ? AND class_id = ?"
-                                );
-                                checkStmt.setString(1, userId);
-                                checkStmt.setString(2, classId);
-                                ResultSet checkRs = checkStmt.executeQuery();
-                                isRegistered = checkRs.next();
-                                checkRs.close();
-                                checkStmt.close();
-                            }
-                %>
-                <tr>
-                    <td><%= classId %></td>
-                    <td><%= rs.getString("subject") %></td>
-                    <td><%= rs.getString("room") %></td>
-                    <td><%= rs.getString("t_name") %></td>
-                    <td><%= time %></td>
-                    <td><%= rs.getString("day_of_week") %></td>
-                    <td><%= rs.getString("academic_session") %></td>
-                    <td><%= rs.getString("semester") %></td>
-                    <% if (userRId == 3) { %>
-                    <td>
-                        <% if (isRegistered) { %>
-                        <form method="POST" action="classes.jsp" style="display:inline;">
-                            <input type="hidden" name="class_id" value="<%= classId %>">
-                            <input type="hidden" name="action" value="drop">
-                            <button type="submit" class="btn btn-danger btn-sm">Drop</button>
-                        </form>
-                        <% } else { %>
-                        <form method="POST" action="classes.jsp" style="display:inline;">
-                            <input type="hidden" name="class_id" value="<%= classId %>">
-                            <input type="hidden" name="action" value="register">
-                            <button type="submit" class="btn btn-primary btn-sm">Register</button>
-                        </form>
-                        <% } %>
-                    </td>
-                    <% } %>
-                </tr>
-                <%
-                        }
-                    } catch (Exception e) {
-                        out.println("<tr><td colspan='" + (userRId == 3 ? 9 : 8) + "'>Error: " + e.getMessage() + "</td></tr>");
-                    } finally {
-                        closeResources(conn, pstmt, rs);
+                    String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+                    for (String day : days) {
+                        out.println("<option value='" + day + "'>" + day + "</option>");
                     }
                 %>
-            </tbody>
-        </table>
+            </select>
+            <label for="filterSession" class="form-label ms-3">Filter by Session:</label>
+            <select id="filterSession" class="form-control d-inline-block w-auto">
+                <option value="">All Sessions</option>
+                <%
+                                try {
+                                    conn = getConnection();
+                                    pstmt = conn.prepareStatement("SELECT DISTINCT academic_session FROM classes ORDER BY academic_session DESC");
+                                    rs = pstmt.executeQuery();
+                                    while (rs.next()) {
+                                        String academicSession = rs.getString("academic_session");
+                                        String selected = academicSession.equals(selectedSession) ? "selected" : "";
+                            %>
+                            <option value="<%= academicSession %>" <%= selected %>><%= academicSession %></option>
+                            <%
+                                    }
+                                } catch (Exception e) {
+                                    out.println("<option>Error: " + e.getMessage() + "</option>");
+                                } finally {
+                                    closeResources(conn, pstmt, rs);
+                                }
+                            %>
+            </select>
+            <label for="filterSemester" class="form-label ms-3">Filter by Semester:</label>
+            <select id="filterSemester" class="form-control d-inline-block w-auto">
+                <option value="">All Semesters</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered" id="classesTable">
+                <thead>
+                    <tr>
+                        <th data-sort="class_id">Class ID</th>
+                        <th data-sort="subject">Subject</th>
+                        <th data-sort="room">Room</th>
+                        <th data-sort="t_name">Teacher</th>
+                        <th data-sort="time">Time</th>
+                        <th data-sort="day_of_week">Day</th>
+                        <th data-sort="academic_session">Session</th>
+                        <th data-sort="semester">Semester</th>
+                        <% if (userRId == 3) { %>
+                        <th>Action</th>
+                        <% } %>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%
+                        try {
+                            conn = getConnection();
+                            pstmt = conn.prepareStatement(
+                                "SELECT c.class_id, c.subject, c.room, t.t_name, c.time_begin, c.time_end, c.day_of_week, c.academic_session, c.semester " +
+                                "FROM classes c JOIN teachers t ON c.t_id = t.t_id"
+                            );
+                            rs = pstmt.executeQuery();
+                            while (rs.next()) {
+                                String classId = rs.getString("class_id");
+                                String timeBegin = rs.getString("time_begin").substring(0, 5);
+                                String timeEnd = rs.getString("time_end").substring(0, 5);
+                                String time = timeBegin + "–" + timeEnd;
+                                boolean isRegistered = false;
+                                if (userRId == 3) {
+                                    PreparedStatement checkStmt = conn.prepareStatement(
+                                        "SELECT 1 FROM student_classes WHERE s_id = ? AND class_id = ?"
+                                    );
+                                    checkStmt.setString(1, userId);
+                                    checkStmt.setString(2, classId);
+                                    ResultSet checkRs = checkStmt.executeQuery();
+                                    isRegistered = checkRs.next();
+                                    checkRs.close();
+                                    checkStmt.close();
+                                }
+                    %>
+                    <tr class="<%= isRegistered ? "registered-class" : "" %>">
+                        <td><%= classId %></td>
+                        <td><%= rs.getString("subject") %></td>
+                        <td><%= rs.getString("room") %></td>
+                        <td><%= rs.getString("t_name") %></td>
+                        <td><%= time %></td>
+                        <td><%= rs.getString("day_of_week") %></td>
+                        <td><%= rs.getString("academic_session") %></td>
+                        <td><%= rs.getString("semester") %></td>
+                        <% if (userRId == 3) { %>
+                        <td>
+                            <% if (isRegistered) { %>
+                            <form method="POST" action="classes.jsp" style="display:inline;">
+                                <input type="hidden" name="class_id" value="<%= classId %>">
+                                <input type="hidden" name="action" value="drop">
+                                <button type="submit" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Drop this class" onclick="return confirm('Are you sure you want to drop class <%= classId %>?');">Drop</button>
+                            </form>
+                            <% } else { %>
+                            <form method="POST" action="classes.jsp" style="display:inline;">
+                                <input type="hidden" name="class_id" value="<%= classId %>">
+                                <input type="hidden" name="action" value="register">
+                                <button type="submit" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="Register for this class">Register</button>
+                            </form>
+                            <% } %>
+                        </td>
+                        <% } %>
+                    </tr>
+                    <%
+                            }
+                        } catch (Exception e) {
+                            out.println("<tr><td colspan='" + (userRId == 3 ? 9 : 8) + "' class='text-danger'>Error: " + e.getMessage() + "</td></tr>");
+                        } finally {
+                            closeResources(conn, pstmt, rs);
+                        }
+                    %>
+                </tbody>
+            </table>
+        </div>
+        <a href="timeTable.jsp" class="btn btn-secondary mt-3">View Timetable</a>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        const table = document.getElementById('classesTable');
+        const headers = table.querySelectorAll('th[data-sort]');
+        headers.forEach(header => {
+            header.addEventListener('click', () => {
+                const sortKey = header.getAttribute('data-sort');
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                const isAscending = header.classList.toggle('sort-asc');
+                rows.sort((a, b) => {
+                    const aText = a.querySelector(`td:nth-child(${Array.from(headers).indexOf(header) + 1})`).textContent.trim();
+                    const bText = b.querySelector(`td:nth-child(${Array.from(headers).indexOf(header) + 1})`).textContent.trim();
+                    return isAscending ? aText.localeCompare(bText) : bText.localeCompare(aText);
+                });
+                while (tbody.firstChild) {
+                    tbody.removeChild(tbody.firstChild);
+                }
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        });
+
+        const filterDay = document.getElementById('filterDay');
+        const filterSession = document.getElementById('filterSession');
+        const filterSemester = document.getElementById('filterSemester');
+        function filterTable() {
+            const dayValue = filterDay.value;
+            const sessionValue = filterSession.value;
+            const semesterValue = filterSemester.value;
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const day = row.cells[5].textContent.trim();
+                const session = row.cells[6].textContent.trim();
+                const semester = row.cells[7].textContent.trim();
+                const dayMatch = !dayValue || day === dayValue;
+                const sessionMatch = !sessionValue || session === sessionValue;
+                const semesterMatch = !semesterValue || semester === semesterValue;
+                row.style.display = (dayMatch && sessionMatch && semesterMatch) ? '' : 'none';
+            });
+        }
+        filterDay.addEventListener('change', filterTable);
+        filterSession.addEventListener('change', filterTable);
+        filterSemester.addEventListener('change', filterTable);
+    });
+</script>
 <%@ include file="footer.jsp"%>

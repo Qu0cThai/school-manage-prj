@@ -2,73 +2,136 @@
 <%@ page import="java.sql.*" %>
 <%@ include file="/WEB-INF/jspf/db-connection.jsp" %>
 <%@ include file="header.jsp"%>
-    <body>
-        <div class="container" style="min-height: 100vh; padding-bottom: 4rem;">
-            <!--body-->
-            <div class="row">
-                <div class="col-12 col-sm-12 col-md-12">
-                    <!--student details-->
-                    <div class="row">
-                        <div class="col-8 offset-md-2">
-                            <div class="container border rounded pb-5">
-                                <br/>
-                                <h3>Student Details:</h3>
-                                <div style="max-height: 70vh; overflow-y: auto; padding-right: 1rem;">
-                                    <% 
-                                        Connection conn = null;
-                                        PreparedStatement pstmt = null;
-                                        ResultSet rs = null;
-                                        String s_id = request.getParameter("s_id");
-                                        try {
-                                            conn = getConnection();
-                                            pstmt = conn.prepareStatement("SELECT s_id, s_name, roll_no, gender, dob, age, f_name, m_name, mobile_no, present_address, permanent_address FROM students WHERE s_id = ?");
-                                            pstmt.setString(1, s_id != null ? s_id : "S001");
-                                            rs = pstmt.executeQuery();
-                                            if (rs.next()) {
-                                    %>
-                                    <form class="form-group" action="" method="">
-                                        <h6 class="modal-title mt-3">Student Name</h6>
-                                        <input class="form-control mb-3" type="text" name="s_name" value="<%= rs.getString("s_name") %>" readonly/>
-                                        <h6 class="modal-title">Roll No</h6>
-                                        <input class="form-control mb-3" type="text" name="roll_no" value="<%= rs.getString("roll_no") %>" readonly/>
-                                        <h6 class="modal-title">Gender</h6>
-                                        <input class="form-control mb-3" type="text" name="gender" value="<%= rs.getString("gender") %>" readonly/>
-                                        <h6 class="modal-title">Date of Birth</h6>
-                                        <input class="form-control mb-3" type="text" name="dob" value="<%= rs.getString("dob") %>" readonly/>
-                                        <h6 class="modal-title">Age</h6>
-                                        <input class="form-control mb-3" type="text" name="age" value="<%= rs.getInt("age") %>" readonly/>
-                                        <h6 class="modal-title">Father Name</h6>
-                                        <input class="form-control mb-3" type="text" name="f_name" value="<%= rs.getString("f_name") %>" readonly/>
-                                        <h6 class="modal-title">Mother Name</h6>
-                                        <input class="form-control mb-3" type="text" name="m_name" value="<%= rs.getString("m_name") %>" readonly/>
-                                        <h6 class="modal-title">Mobile No</h6>
-                                        <input class="form-control mb-3" type="text" name="mobile_no" value="<%= rs.getString("mobile_no") %>" readonly/>
-                                        <h6 class="modal-title">Present Address</h6>
-                                        <input class="form-control mb-3" type="text" name="present_address" value="<%= rs.getString("present_address") %>" readonly/>
-                                        <h6 class="modal-title">Permanent Address</h6>
-                                        <input class="form-control mb-3" type="text" name="permanent_address" value="<%= rs.getString("permanent_address") %>" readonly/>
-                                    </form>
-                                    <% 
-                                            } else {
-                                    %>
-                                    <p class="text-danger">Student not found.</p>
-                                    <% 
-                                            }
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                    %>
-                                    <p class="text-danger">Error loading student details.</p>
-                                    <% 
-                                        } finally {
-                                            closeResources(conn, pstmt, rs);
-                                        }
-                                    %>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<style>
+    h3 {
+        color: #4facfe;
+        margin-top: 2rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    .form-container {
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        padding: 2rem;
+        animation: fadeIn 1s ease-in;
+        margin-bottom: 2rem;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    .form-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    .form-group label {
+        color: #495057;
+        font-weight: bold;
+    }
+    .form-group input {
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        transition: border-color 0.3s ease;
+    }
+    .form-group input[readonly] {
+        background-color: #f8f9fa;
+        cursor: not-allowed;
+    }
+    .form-group input:focus {
+        border-color: #4facfe;
+        box-shadow: 0 0 5px rgba(79, 172, 254, 0.3);
+    }
+    .btn-secondary {
+        background: linear-gradient(90deg, #ff7e5f, #feb47b);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+        transform: scale(1.05);
+        background: linear-gradient(90deg, #ff7e5f, #feb47b);
+    }
+    .alert-danger {
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+</style>
+<div class="container mt-4">
+    <div class="form-container">
+        <h3>Student Details</h3>
+        <% 
+            Connection conn = null;
+            PreparedStatement pstmt = null;
+            ResultSet rs = null;
+            String s_id = request.getParameter("s_id");
+            try {
+                conn = getConnection();
+                pstmt = conn.prepareStatement("SELECT s_id, s_name, roll_no, gender, dob, age, f_name, m_name, mobile_no, present_address, permanent_address FROM students WHERE s_id = ?");
+                pstmt.setString(1, s_id != null ? s_id : "S001");
+                rs = pstmt.executeQuery();
+                if (rs.next()) {
+        %>
+        <form class="form-group">
+            <div class="form-group">
+                <label for="s_id">Student ID</label>
+                <input class="form-control" id="s_id" name="s_id" type="text" value="<%= rs.getString("s_id") %>" readonly>
             </div>
-        </div>
-    </body>
+            <div class="form-group">
+                <label for="s_name">Student Name</label>
+                <input class="form-control" id="s_name" name="s_name" type="text" value="<%= rs.getString("s_name") %>" readonly>
+            </div>
+            <div class="form-group">
+                <label for="roll_no">Roll No</label>
+                <input class="form-control" id="roll_no" name="roll_no" type="text" value="<%= rs.getString("roll_no") %>" readonly>
+            </div>
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <input class="form-control" id="gender" name="gender" type="text" value="<%= rs.getString("gender") %>" readonly>
+            </div>
+            <div class="form-group">
+                <label for="dob">Date of Birth</label>
+                <input class="form-control" id="dob" name="dob" type="text" value="<%= rs.getString("dob") %>" readonly>
+            </div>
+            <div class="form-group">
+                <label for="age">Age</label>
+                <input class="form-control" id="age" name="age" type="text" value="<%= rs.getInt("age") %>" readonly>
+            </div>
+            <div class="form-group">
+                <label for="f_name">Father Name</label>
+                <input class="form-control" id="f_name" name="f_name" type="text" value="<%= rs.getString("f_name") %>" readonly>
+            </div>
+            <div class="form-group">
+                <label for="m_name">Mother Name</label>
+                <input class="form-control" id="m_name" name="m_name" type="text" value="<%= rs.getString("m_name") %>" readonly>
+            </div>
+            <div class="form-group">
+                <label for="mobile_no">Mobile No</label>
+                <input class="form-control" id="mobile_no" name="mobile_no" type="text" value="<%= rs.getString("mobile_no") %>" readonly>
+            </div>
+            <div class="form-group">
+                <label for="present_address">Present Address</label>
+                <input class="form-control" id="present_address" name="present_address" type="text" value="<%= rs.getString("present_address") %>" readonly>
+            </div>
+            <div class="form-group">
+                <label for="permanent_address">Permanent Address</label>
+                <input class="form-control" id="permanent_address" name="permanent_address" type="text" value="<%= rs.getString("permanent_address") %>" readonly>
+            </div>
+            <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
+        </form>
+        <% 
+                } else {
+        %>
+        <div class="alert alert-danger text-center">Student not found.</div>
+        <% 
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+        %>
+        <div class="alert alert-danger text-center">Error loading student details: <%= e.getMessage() %></div>
+        <% 
+            } finally {
+                closeResources(conn, pstmt, rs);
+            }
+        %>
+    </div>
+</div>
 <%@ include file="footer.jsp"%>

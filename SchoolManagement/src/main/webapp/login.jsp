@@ -7,10 +7,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - School Management System</title>
-    <!-- Bootstrap 5.3.0 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
     <style>
         body {
@@ -116,7 +114,6 @@
                                 ResultSet rs = null;
                                 try {
                                     conn = getConnection();
-                                    // Hash password with MD5
                                     MessageDigest md = MessageDigest.getInstance("MD5");
                                     byte[] hash = md.digest(password.getBytes());
                                     StringBuilder hexString = new StringBuilder();
@@ -205,7 +202,7 @@
                                     <input type="password" class="form-control" id="password" name="password" required>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block">Login</button>
+                            <button type="submit" class="btn btn-primary btn-block" >Login</button>
                         </form>
                         <div class="text-center mt-3">
                             <p>Don't have an account? <a href="register.jsp">Register here</a></p>

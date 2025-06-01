@@ -3,12 +3,6 @@
 <%@ include file="/WEB-INF/jspf/db-connection.jsp"%>
 <%@ page import="java.sql.*" %>
 <style>
-    .jumbotron {
-        background: linear-gradient(135deg, #4facfe, #00f2fe);
-        color: white;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        border-radius: 10px;
-    }
     .list-group-item {
         background: #f8f9fa;
         border: none;
@@ -32,14 +26,6 @@
         padding: 15px;
         animation: fadeIn 1s ease-in;
     }
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
-    }
     .btn-secondary {
         background: linear-gradient(90deg, #ff7e5f, #feb47b);
         border: none;
@@ -55,15 +41,15 @@
     .list-group-item:hover i {
         color: white;
     }
+    h3 {
+        text-align: center;
+    }
 </style>
 <div class="container mt-4">
-    <!-- Debug Output -->
     <%        Integer userRId = (Integer) session.getAttribute("userRId");
         out.println("<!-- Debug: userRId = " + (userRId != null ? userRId : "null") + ", username = " + (username != null ? username : "null") + " -->");
     %>
-    <!-- Body -->
     <div class="row">
-        <!-- Sidebar for Admin, Teacher, or Student -->
         <%
             if (userRId != null && (userRId == 1 || userRId == 2 || userRId == 3)) {
                 try {
@@ -71,7 +57,7 @@
         <div class="col-12 col-md-3 mb-4">
             <div class="sidebar">
                 <%
-                    if (userRId == 1) { // Admin
+                    if (userRId == 1) {
                 %>
                 <h3 class="text-primary">Admin Dashboard</h3>
                 <div class="list-group">
@@ -81,7 +67,7 @@
                     <a href="studentInformation.jsp" class="list-group-item list-group-item-action"><i class="fas fa-user-graduate me-2"></i>Students Information</a>         
                 </div>
                 <%
-                } else if (userRId == 2) { // Teacher
+                } else if (userRId == 2) { 
                     Connection conn = null;
                     Statement stmt = null;
                     ResultSet rs = null;
@@ -117,7 +103,7 @@
                     <a href="studentInformation.jsp" class="list-group-item list-group-item-action"><i class="fas fa-user-graduate me-2"></i>Students Information</a>                            
                 </div>
                 <%
-                } else if (userRId == 3) { // Student
+                } else if (userRId == 3) {
                 %>
                 <h3 class="text-info">Student Dashboard</h3>
                 <div class="list-group">
@@ -137,7 +123,6 @@
                 }
             }
         %>
-        <!-- Notice Board -->
         <div class="<%= (userRId == null) ? "col-12 col-md-12" : "col-12 col-md-9"%>">
             <div class="notice-board">
                 <button type="button" class="btn btn-secondary btn-lg btn-block">Notice Board</button>

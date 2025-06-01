@@ -7,10 +7,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration - School Management System</title>
-    <!-- Bootstrap 5.3.0 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
     <style>
         body {
@@ -191,7 +189,6 @@
         PreparedStatement pstmt = null;
         try {
             conn = getConnection();
-            // Check if username or email exists
             pstmt = conn.prepareStatement("SELECT COUNT(*) FROM users WHERE u_name = ? OR email = ?");
             pstmt.setString(1, u_name);
             pstmt.setString(2, email);
@@ -204,7 +201,6 @@
             rs.close();
             pstmt.close();
 
-            // Generate u_id based on role
             String u_id_prefix = "";
             if ("2".equals(r_id)) {
                 u_id_prefix = "T";
@@ -227,7 +223,6 @@
             pstmt.close();
             String u_id = String.format("%s%03d", u_id_prefix, nextNumber);
 
-            // Hash password (using MD5 for simplicity; use BCrypt in production)
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(password.getBytes());
             byte[] digest = md.digest();
@@ -237,7 +232,6 @@
             }
             String hashedPassword = sb.toString();
 
-            // Insert new user
             pstmt = conn.prepareStatement("INSERT INTO users (u_id, u_name, password, email, phone, r_id) VALUES (?, ?, ?, ?, ?, ?)");
             pstmt.setString(1, u_id);
             pstmt.setString(2, u_name);
@@ -247,7 +241,6 @@
             pstmt.setInt(6, Integer.parseInt(r_id));
             pstmt.executeUpdate();
 
-            // If teacher or student, insert into respective tables
             if ("2".equals(r_id)) {
                 pstmt = conn.prepareStatement("INSERT INTO teachers (t_id, t_name, t_email, phone_number) VALUES (?, ?, ?, ?)");
                 pstmt.setString(1, u_id);
@@ -267,7 +260,7 @@
         } catch (SQLException e) {
             e.printStackTrace();
             System.err.println("SQL Error: " + e.getMessage() + ", SQLState: " + e.getSQLState());
-            if (e.getSQLState().startsWith("23")) { // Integrity constraint violation
+            if (e.getSQLState().startsWith("23")) { 
                 response.sendRedirect("register.jsp?error=exists");
             } else {
                 response.sendRedirect("register.jsp?error=db");
