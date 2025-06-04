@@ -2,7 +2,6 @@
 <%@ include file="header.jsp"%>
 <%@ include file="/WEB-INF/jspf/db-connection.jsp"%>
 <%@ page import="java.sql.*" %>
-<%-- JSP logic remains unchanged --%>
 <%
     String u_id = (String) session.getAttribute("u_id");
     String u_name = (String) session.getAttribute("u_name");
@@ -301,7 +300,9 @@
                 </tbody>
             </table>
         </div>
+        <% if (userRId == 2 || userRId == 3) { %>
         <a href="timeTable.jsp" class="btn btn-secondary mt-3">View Timetable</a>
+        <% } %>
     </div>
 </div>
 <script>

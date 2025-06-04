@@ -2,7 +2,7 @@
 <%!
     private static final String JDBC_URL ="jdbc:mysql://localhost:3306/schoolmanagedb";
     private static final String JDBC_USER ="root";
-    private static final String JDBC_PASSWORD ="nuocmat1";
+    private static final String JDBC_PASSWORD ="12345";
     
     public static Connection getConnection()throws SQLException,
  ClassNotFoundException {

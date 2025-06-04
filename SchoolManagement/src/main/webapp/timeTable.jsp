@@ -32,6 +32,12 @@
         return;
     }
 
+    if (userRId == 1) {
+        session.setAttribute("error", "Access denied: Admins cannot view the timetable.");
+        response.sendRedirect("index.jsp");
+        return;
+    }
+
     String userId = u_id;
     try {
         conn = getConnection();
@@ -178,7 +184,7 @@
                         </select>
                     </div>
                     <div class="form-group col-md-2">
-                        <label>&nbsp;</label>
+                        <label> </label>
                         <button type="submit" class="btn btn-primary btn-block">Filter</button>
                     </div>
                 </div>
@@ -218,9 +224,7 @@
 
                                 String sql = "";
                                 List<String> params = new ArrayList<>();
-                                if (userRId == 1) {
-                                    sql = "SELECT class_id, subject, room, day_of_week, time_begin, time_end, academic_session, semester FROM classes WHERE time_begin >= '07:00' AND time_end <= '23:00'";
-                                } else if (userRId == 2) {
+                                if (userRId == 2) {
                                     sql = "SELECT class_id, subject, room, day_of_week, time_begin, time_end, academic_session, semester FROM classes WHERE t_id = ? AND time_begin >= '07:00' AND time_end <= '23:00'";
                                     params.add(userId);
                                 } else if (userRId == 3) {
@@ -300,9 +304,7 @@
                                             }
 
                                             String cellClass = "";
-                                            if (userRId == 1) {
-                                                cellClass = "class-cell-admin";
-                                            } else if (userRId == 2) {
+                                            if (userRId == 2) {
                                                 cellClass = "class-cell-teacher";
                                             } else if (userRId == 3) {
                                                 cellClass = "class-cell-student";
