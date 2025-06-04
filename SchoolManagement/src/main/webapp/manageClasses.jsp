@@ -2,6 +2,7 @@
 <%@ include file="header.jsp"%>
 <%@ include file="/WEB-INF/jspf/db-connection.jsp"%>
 <%@ page import="java.sql.*, java.time.*, java.util.Arrays" %>
+<%-- JSP logic remains unchanged --%>
 <%
     String u_id = (String) session.getAttribute("u_id");
     String u_name = (String) session.getAttribute("u_name");
@@ -248,11 +249,9 @@
         border-radius: 15px;
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         padding: 2rem;
-        animation: fadeIn 1s ease-in;
         margin-bottom: 2rem;
     }
     .form-group {
-        position: relative;
         margin-bottom: 1.5rem;
     }
     .form-group label {
@@ -262,38 +261,29 @@
     .form-group input, .form-group select {
         border-radius: 8px;
         border: 1px solid #ced4da;
-        transition: border-color 0.3s ease;
     }
     .form-group input:focus, .form-group select:focus {
         border-color: #4facfe;
         box-shadow: 0 0 5px rgba(79, 172, 254, 0.3);
     }
-    .form-group .tooltip-icon {
-        position: absolute;
-        right: 10px;
-        top: 38px;
-        color: #4facfe;
-        cursor: pointer;
-    }
     .btn-primary {
         background: #4facfe;
         border: none;
-        transition: all 0.3s ease;
+        transition: transform 0.3s ease;
     }
     .btn-primary:hover {
-        background: #4facfe;
         transform: scale(1.05);
     }
-    .btn-secondary, .btn-warning, .btn-danger {
-        transition: all 0.3s ease;
+    .btn-secondary, .btn-warning {
+        transition: transform 0.3s ease;
     }
     .btn-secondary {
         background: linear-gradient(90deg, #ff7e5f, #feb47b);
         border: none;
     }
     .btn-secondary:hover {
+        background: linear-gradient(90deg, #feb47b, #ff7e5f);
         transform: scale(1.05);
-        background: linear-gradient(90deg, #ff7e5f, #feb47b);
     }
     .btn-warning {
         background: linear-gradient(90deg, #ffca28, #ffeb3b);
@@ -301,14 +291,6 @@
     }
     .btn-warning:hover {
         background: linear-gradient(90deg, #ffeb3b, #ffca28);
-        transform: scale(1.05);
-    }
-    .btn-danger {
-        background: linear-gradient(90deg, #dc3545, #f44336);
-        border: none;
-    }
-    .btn-danger:hover {
-        background: linear-gradient(90deg, #f44336, #dc3545);
         transform: scale(1.05);
     }
     .table {
@@ -321,27 +303,14 @@
         text-align: center;
         cursor: pointer;
     }
-    .table tbody tr {
-        transition: background-color 0.3s ease;
-    }
-    .table tbody tr:hover {
-        background: #e0f7fa;
-    }
-    .table tbody td {
-        text-align: center;
-        vertical-align: middle;
-    }
     .table tbody tr.my-class {
         background: rgba(40, 167, 69, 0.2);
     }
-    .alert-success, .alert-danger {
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-        text-align: center;
-    }
+    /* Removed unused .tooltip-icon, .btn-danger, .table tbody tr:hover, .table tbody td */
 </style>
 <div class="container mt-4">
     <div class="form-container">
+        <%= message %>
         <% if (showEditForm) { %>
         <h3>Edit Class <%= editClassId %></h3>
         <form method="POST" action="manageClasses.jsp">
@@ -452,7 +421,7 @@
         <h3>Existing Classes</h3>
         <div class="mb-3">
             <label for="filterDay" class="form-label">Filter by Day:</label>
-            <select id="filterDay" class="form-control d-inline-block w-auto">
+            <select id="filterDay" class="form-control">
                 <option value="">All Days</option>
                 <%
                     String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
@@ -462,7 +431,7 @@
                 %>
             </select>
             <label for="filterSemester" class="form-label ms-3">Filter by Semester:</label>
-            <select id="filterSemester" class="form-control d-inline-block w-auto">
+            <select id="filterSemester" class="form-control">
                 <option value="">All Semesters</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -543,11 +512,6 @@
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-
         const table = document.getElementById('classesTable');
         const headers = table.querySelectorAll('th[data-sort]');
         headers.forEach(header => {
@@ -557,33 +521,31 @@
                 const rows = Array.from(tbody.querySelectorAll('tr'));
                 const isAscending = header.classList.toggle('sort-asc');
                 rows.sort((a, b) => {
-                    const aText = a.querySelector(`td:nth-child(${Array.from(headers).indexOf(header) + 1})`).textContent.trim();
-                    const bText = b.querySelector(`td:nth-child(${Array.from(headers).indexOf(header) + 1})`).textContent.trim();
+                    const aText = a.cells[Array.from(headers).indexOf(header)].textContent.trim();
+                    const bText = b.cells[Array.from(headers).indexOf(header)].textContent.trim();
                     return isAscending ? aText.localeCompare(bText) : bText.localeCompare(aText);
                 });
-                while (tbody.firstChild) {
-                    tbody.removeChild(tbody.firstChild);
-                }
+                tbody.innerHTML = '';
                 rows.forEach(row => tbody.appendChild(row));
             });
         });
 
-        const filterDay = document.getElementById('filterDay');
-        const filterSemester = document.getElementById('filterSemester');
-        function filterTable() {
-            const dayValue = filterDay.value;
-            const semesterValue = filterSemester.value;
-            const rows = table.querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                const day = row.cells[5].textContent.trim();
-                const semester = row.cells[7].textContent.trim();
-                const dayMatch = !dayValue || day === dayValue;
-                const semesterMatch = !semesterValue || semester === semesterValue;
-                row.style.display = (dayMatch && semesterMatch) ? '' : 'none';
+        const filters = [
+            { id: 'filterDay', cellIndex: 5 },
+            { id: 'filterSemester', cellIndex: 7 }
+        ];
+        filters.forEach(filter => {
+            document.getElementById(filter.id).addEventListener('change', () => {
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const matches = filters.every(f => {
+                        const value = document.getElementById(f.id).value;
+                        return !value || row.cells[f.cellIndex].textContent.trim() === value;
+                    });
+                    row.style.display = matches ? '' : 'none';
+                });
             });
-        }
-        filterDay.addEventListener('change', filterTable);
-        filterSemester.addEventListener('change', filterTable);
+        });
     });
 </script>
 <%@ include file="footer.jsp"%>

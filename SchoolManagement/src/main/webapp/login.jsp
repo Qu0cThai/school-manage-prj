@@ -21,77 +21,77 @@
             padding-bottom: 4rem;
             margin: 0;
         }
-        .login-card {
-            background: linear-gradient(135deg, #ffffff, #e0f7fa);
-            border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 400px;
-            animation: fadeIn 1s ease-in;
-        }
-        .card-header {
-            background: linear-gradient(90deg, #4facfe, #00f2fe);
-            color: white;
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
-            padding: 1.5rem;
-            text-align: center;
-        }
-        .card-body {
-            padding: 2rem;
-        }
-        .input-group-text {
-            background: #b2ebf2;
-            border: 2px solid #b2ebf2;
-            border-right: none;
-            color: #4facfe;
-            border-radius: 8px 0 0 8px;
-        }
-        .form-control, .form-select {
-            border: 2px solid #b2ebf2;
-            border-left: none;
-            border-radius: 0 8px 8px 0;
-            transition: all 0.3s ease;
-        }
-        .form-control:focus, .form-select:focus {
-            border-color: #4facfe;
-            box-shadow: 0 0 8px rgba(79, 172, 254, 0.3);
-        }
-        .btn-primary {
-            background: linear-gradient(90deg, #ff7e5f, #feb47b);
-            border: none;
-            border-radius: 8px;
-            padding: 0.75rem;
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(90deg, #feb47b, #ff7e5f);
-            transform: scale(1.05);
-        }
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border-radius: 8px;
-            animation: slideIn 0.5s ease;
-        }
-        a {
-            color: #4facfe;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        a:hover {
-            color: #feb47b;
-            text-decoration: underline;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-    </style>
+    .login-card {
+        background: linear-gradient(135deg, #ffffff, #e0f7fa);
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 400px;
+        animation: fadeIn 1s ease-in;
+    }
+    .card-header {
+        background: linear-gradient(90deg, #4facfe, #00f2fe);
+        color: white;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    .card-body {
+        padding: 2rem;
+    }
+    .input-group-text {
+        background: #b2ebf2;
+        border: 2px solid #b2ebf2;
+        border-right: none;
+        color: #4facfe;
+        border-radius: 8px 0 0 8px;
+    }
+    .form-control, .form-select {
+        border: 2px solid #b2ebf2;
+        border-left: none;
+        border-radius: 0 8px 8px 0;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #4facfe;
+        box-shadow: 0 0 8px rgba(79, 172, 254, 0.3);
+    }
+    .btn-primary {
+        background: linear-gradient(90deg, #ff7e5f, #feb47b);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(90deg, #feb47b, #ff7e5f);
+        transform: scale(1.05);
+    }
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+        border-radius: 8px;
+        animation: slideIn 0.5s ease;
+    }
+    a {
+        color: #4facfe;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    a:hover {
+        color: #feb47b;
+        text-decoration: underline;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+</style>
 </head>
 <body>
     <div class="container">
@@ -150,7 +150,7 @@
                                         errorMessage = "Invalid username, password, or role.";
                                     }
                                 } catch (Exception e) {
-                                    errorMessage = "Error: " + e.getMessage();
+                                    errorMessage = "Login failed. Please try again.";
                                 } finally {
                                     closeResources(conn, pstmt, rs);
                                 }
@@ -160,7 +160,7 @@
                             <div class="alert alert-danger"><%= errorMessage %></div>
                         <% } %>
                         <form method="POST" action="login.jsp">
-                            <div class="form-group mb-4">
+                            <div class="mb-4">
                                 <label for="role" class="mb-1">Role</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-users"></i></span>
@@ -188,21 +188,21 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="form-group mb-4">
+                            <div class="mb-4">
                                 <label for="username" class="mb-1">Username</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-user"></i></span>
                                     <input type="text" class="form-control" id="username" name="username" required>
                                 </div>
                             </div>
-                            <div class="form-group mb-4">
+                            <div class="mb-4">
                                 <label for="password" class="mb-1">Password</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                     <input type="password" class="form-control" id="password" name="password" required>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block" >Login</button>
+                            <button type="submit" class="btn btn-primary w-100" >Login</button>
                         </form>
                         <div class="text-center mt-3">
                             <p>Don't have an account? <a href="register.jsp">Register here</a></p>

@@ -17,20 +17,20 @@
         animation: fadeIn 1s ease-in;
         margin-bottom: 2rem;
     }
-    .form-group {
+    .mb-3 {
         position: relative;
         margin-bottom: 1.5rem;
     }
-    .form-group label {
+    .mb-3 label {
         color: #495057;
         font-weight: bold;
     }
-    .form-group input, .form-group textarea, .form-group select {
+    .mb-3 input, .mb-3 textarea, .mb-3 select {
         border-radius: 8px;
         border: 1px solid #ced4da;
         transition: border-color 0.3s ease;
     }
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    .mb-3 input:focus, .mb-3 textarea:focus, .mb-3 select:focus {
         border-color: #4facfe;
         box-shadow: 0 0 5px rgba(79, 172, 254, 0.3);
     }
@@ -40,7 +40,6 @@
         transition: all 0.3s ease;
     }
     .btn-primary:hover {
-        background: #4facfe;
         transform: scale(1.05);
     }
     .btn-secondary {
@@ -50,7 +49,6 @@
     }
     .btn-secondary:hover {
         transform: scale(1.05);
-        background: linear-gradient(90deg, #ff7e5f, #feb47b);
     }
     .alert-success, .alert-danger {
         border-radius: 8px;
@@ -151,15 +149,15 @@
     <div class="form-container">
         <h3>Edit Your Profile</h3>
         <form method="POST" action="editTeacher.jsp">
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="t_name">Name</label>
                 <input type="text" class="form-control" id="t_name" name="t_name" value="<%= t_name %>" required>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="t_email">Email</label>
                 <input type="email" class="form-control" id="t_email" name="t_email" value="<%= t_email %>" required>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="gender">Gender</label>
                 <select class="form-control" id="gender" name="gender" required>
                     <option value="Male" <%= "Male".equals(gender) ? "selected" : "" %>>Male</option>
@@ -167,33 +165,25 @@
                     <option value="Other" <%= "Other".equals(gender) ? "selected" : "" %>>Other</option>
                 </select>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="phone_number">Phone Number</label>
                 <input type="text" class="form-control" id="phone_number" name="phone_number" value="<%= phone_number %>" pattern="[0-9]{10}" title="Enter a valid 10-digit phone number">
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="address">Address</label>
                 <textarea class="form-control" id="address" name="address" rows="3"><%= address %></textarea>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="sub_name">Subject</label>
                 <input type="text" class="form-control" id="sub_name" name="sub_name" value="<%= sub_name %>">
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="join_date">Join Date</label>
                 <input type="date" class="form-control" id="join_date" name="join_date" value="<%= join_date %>" required>
             </div>
             <button type="submit" class="btn btn-primary">Save Profile</button>
-            <a href="index.jsp" class="btn btn-secondary">Cancel</a>
+            <a href="teacherInformation.jsp" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
 </div>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    });
-</script>
 <%@ include file="footer.jsp"%>

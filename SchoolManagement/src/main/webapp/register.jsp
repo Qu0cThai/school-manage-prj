@@ -168,9 +168,9 @@
                                 </select>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block">Register</button>
+                        <button type="submit" class="btn btn-primary w-100">Register</button>
                     </form>
-                    <div class="text-right mt-3">
+                    <div class="text-center mt-3">
                         <small><a href="login.jsp">Back to Login</a></small>
                     </div>
                 </div>
@@ -258,16 +258,12 @@
 
             response.sendRedirect("login.jsp?success=registered");
         } catch (SQLException e) {
-            e.printStackTrace();
-            System.err.println("SQL Error: " + e.getMessage() + ", SQLState: " + e.getSQLState());
             if (e.getSQLState().startsWith("23")) { 
                 response.sendRedirect("register.jsp?error=exists");
             } else {
                 response.sendRedirect("register.jsp?error=db");
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("General Error: " + e.getMessage());
             response.sendRedirect("register.jsp?error=db");
         } finally {
             try { if (rs != null) rs.close(); } catch (SQLException e) {}

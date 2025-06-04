@@ -84,7 +84,7 @@
                 <thead class="thead-dark">
                     <tr>
                         <th scope="col">Student Name</th>
-                        <th scope="col">Roll No</th>
+                        <th scope="col">Student Id</th>
                         <th scope="col">Mobile No</th>
                         <th scope="col">Address</th>
                         <th scope="col">Actions</th>
@@ -100,7 +100,7 @@
                         boolean isStudent = userRId != null && userRId == 3;
                         try {
                             conn = getConnection();
-                            pstmt = conn.prepareStatement("SELECT s_id, s_name, roll_no, mobile_no, present_address FROM students");
+                            pstmt = conn.prepareStatement("SELECT s_id, s_name, mobile_no, present_address FROM students");
                             rs = pstmt.executeQuery();
                             if (!rs.isBeforeFirst()) { 
                     %>
@@ -112,13 +112,12 @@
                                 while (rs.next()) {
                                     String s_id = rs.getString("s_id");
                                     String s_name = rs.getString("s_name");
-                                    String roll_no = rs.getString("roll_no");
                                     String mobile_no = rs.getString("mobile_no");
                                     String present_address = rs.getString("present_address");
                     %>
                     <tr>
                         <td scope="row"><%= s_name != null ? s_name : "-" %></td>
-                        <td><%= roll_no != null ? roll_no : "-" %></td>
+                        <td><%= s_id != null ? s_id : "-" %></td>
                         <td><%= mobile_no != null ? mobile_no : "-" %></td>
                         <td><%= present_address != null ? present_address : "-" %></td>
                         <td>

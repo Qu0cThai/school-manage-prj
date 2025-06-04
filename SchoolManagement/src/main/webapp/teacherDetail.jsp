@@ -16,27 +16,25 @@
         padding: 2rem;
         animation: fadeIn 1s ease-in;
         margin-bottom: 2rem;
-        max-height: 70vh;
-        overflow-y: auto;
     }
-    .form-group {
+    .mb-3 {
         position: relative;
         margin-bottom: 1.5rem;
     }
-    .form-group label {
+    .mb-3 label {
         color: #495057;
         font-weight: bold;
     }
-    .form-group input, .form-group textarea {
+    .mb-3 input, .mb-3 textarea {
         border-radius: 8px;
         border: 1px solid #ced4da;
         transition: border-color 0.3s ease;
     }
-    .form-group input[readonly], .form-group textarea[readonly] {
+    .mb-3 input[readonly], .mb-3 textarea[readonly] {
         background-color: #f8f9fa;
         cursor: not-allowed;
     }
-    .form-group input:focus, .form-group textarea:focus {
+    .mb-3 input:focus, .mb-3 textarea:focus {
         border-color: #4facfe;
         box-shadow: 0 0 5px rgba(79, 172, 254, 0.3);
     }
@@ -47,7 +45,6 @@
     }
     .btn-secondary:hover {
         transform: scale(1.05);
-        background: linear-gradient(90deg, #ff7e5f, #feb47b);
     }
     .alert-danger {
         border-radius: 8px;
@@ -58,8 +55,7 @@
 <div class="container mt-4">
     <div class="form-container">
         <h3>Teacher Details</h3>
-        <% 
-            Connection conn = null;
+        <%            Connection conn = null;
             PreparedStatement pstmt = null;
             ResultSet rs = null;
             String t_id = request.getParameter("t_id");
@@ -70,52 +66,52 @@
                 rs = pstmt.executeQuery();
                 if (rs.next()) {
         %>
-        <form class="form-group">
-            <div class="form-group">
+        <div class="mb-3">
+            <div class="mb-3">
                 <label for="t_id">Teacher ID</label>
-                <input class="form-control" id="t_id" name="t_id" type="text" value="<%= rs.getString("t_id") %>" readonly>
+                <input class="form-control" id="t_id" name="t_id" type="text" value="<%= rs.getString("t_id")%>" readonly>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="t_name">Teacher Name</label>
-                <input class="form-control" id="t_name" name="t_name" type="text" value="<%= rs.getString("t_name") %>" readonly>
+                <input class="form-control" id="t_name" name="t_name" type="text" value="<%= rs.getString("t_name")%>" readonly>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="t_email">Email</label>
-                <input class="form-control" id="t_email" name="t_email" type="text" value="<%= rs.getString("t_email") %>" readonly>
+                <input class="form-control" id="t_email" name="t_email" type="text" value="<%= rs.getString("t_email")%>" readonly>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="gender">Gender</label>
-                <input class="form-control" id="gender" name="gender" type="text" value="<%= rs.getString("gender") %>" readonly>
+                <input class="form-control" id="gender" name="gender" type="text" value="<%= rs.getString("gender")%>" readonly>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="phone_number">Phone Number</label>
-                <input class="form-control" id="phone_number" name="phone_number" type="text" value="<%= rs.getString("phone_number") %>" readonly>
+                <input class="form-control" id="phone_number" name="phone_number" type="text" value="<%= rs.getString("phone_number")%>" readonly>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="address">Address</label>
-                <textarea class="form-control" id="address" name="address" readonly><%= rs.getString("address") %></textarea>
+                <textarea class="form-control" id="address" name="address" readonly><%= rs.getString("address")%></textarea>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="sub_name">Subject Name</label>
-                <input class="form-control" id="sub_name" name="sub_name" type="text" value="<%= rs.getString("sub_name") %>" readonly>
+                <input class="form-control" id="sub_name" name="sub_name" type="text" value="<%= rs.getString("sub_name")%>" readonly>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="join_date">Join Date</label>
-                <input class="form-control" id="join_date" name="join_date" type="text" value="<%= rs.getString("join_date") %>" readonly>
+                <input class="form-control" id="join_date" name="join_date" type="text" value="<%= rs.getString("join_date")%>" readonly>
             </div>
             <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
-        </form>
-        <% 
-                } else {
+        </div>
+        <%
+        } else {
         %>
         <div class="alert alert-danger text-center">Teacher not found.</div>
-        <% 
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+        <%
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         %>
-        <div class="alert alert-danger text-center">Error loading teacher details: <%= e.getMessage() %></div>
-        <% 
+        <div class="alert alert-danger text-center">Error loading teacher details: <%= e.getMessage()%></div>
+        <%
             } finally {
                 closeResources(conn, pstmt, rs);
             }

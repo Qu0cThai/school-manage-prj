@@ -1,5 +1,4 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-</div>
 <footer class="bg-dark text-white text-center p-4 mt-5">
     <div class="container">
         <p class="mb-2">© 2025 School Management System Project</p>
@@ -16,10 +15,7 @@
         box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
     }
     footer a:hover {
-        color: #feb47b !important;
+        color: #feb47b;
         transform: scale(1.05);
-        display: inline-block;
     }
 </style>
-</body>
-</html>

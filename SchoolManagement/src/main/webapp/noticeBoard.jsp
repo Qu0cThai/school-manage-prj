@@ -3,10 +3,6 @@
 <%@ include file="header.jsp" %>
 <%@ include file="/WEB-INF/jspf/db-connection.jsp" %>
 <style>
-    body {
-        background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
-        font-family: 'Arial', sans-serif;
-    }
     .notice-board {
         background: #ffffff;
         border-radius: 10px;
@@ -26,7 +22,7 @@
 </style>
 <div class="container mt-4">
     <div class="notice-board">
-        <button type="button" class="btn btn-secondary btn-lg btn-block">Notice Board</button>
+        <button type="button" class="btn btn-secondary btn-lg w-100">Notice Board</button>
         <div class="list-group mt-3">
             <%
                 Connection conn = null;

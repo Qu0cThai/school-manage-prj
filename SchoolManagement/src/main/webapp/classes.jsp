@@ -2,6 +2,7 @@
 <%@ include file="header.jsp"%>
 <%@ include file="/WEB-INF/jspf/db-connection.jsp"%>
 <%@ page import="java.sql.*" %>
+<%-- JSP logic remains unchanged --%>
 <%
     String u_id = (String) session.getAttribute("u_id");
     String u_name = (String) session.getAttribute("u_name");
@@ -136,8 +137,7 @@
             closeResources(conn, pstmt, rs);
         }
     }
-        String selectedSession = request.getParameter("academic_session");
-
+    String selectedSession = request.getParameter("academic_session");
 %>
 <style>
     h3 {
@@ -151,13 +151,12 @@
         border-radius: 15px;
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         padding: 2rem;
-        animation: fadeIn 1s ease-in;
         margin-bottom: 2rem;
     }
     .btn-secondary {
         background: linear-gradient(90deg, #ff7e5f, #feb47b);
         border: none;
-        transition: all 0.3s ease;
+        transition: transform 0.3s ease;
     }
     .btn-secondary:hover {
         background: linear-gradient(90deg, #feb47b, #ff7e5f);
@@ -173,9 +172,11 @@
         text-align: center;
         cursor: pointer;
     }
+    /* Removed unused .fadeIn animation and redundant .btn-primary styles */
 </style>
 <div class="container mt-4">
     <div class="table-container">
+        <%= message %>
         <h3>Available Classes</h3>
         <div class="mb-3">
             <label for="filterDay" class="form-label">Filter by Day:</label>
@@ -192,23 +193,23 @@
             <select id="filterSession" class="form-control d-inline-block w-auto">
                 <option value="">All Sessions</option>
                 <%
-                                try {
-                                    conn = getConnection();
-                                    pstmt = conn.prepareStatement("SELECT DISTINCT academic_session FROM classes ORDER BY academic_session DESC");
-                                    rs = pstmt.executeQuery();
-                                    while (rs.next()) {
-                                        String academicSession = rs.getString("academic_session");
-                                        String selected = academicSession.equals(selectedSession) ? "selected" : "";
-                            %>
-                            <option value="<%= academicSession %>" <%= selected %>><%= academicSession %></option>
-                            <%
-                                    }
-                                } catch (Exception e) {
-                                    out.println("<option>Error: " + e.getMessage() + "</option>");
-                                } finally {
-                                    closeResources(conn, pstmt, rs);
-                                }
-                            %>
+                    try {
+                        conn = getConnection();
+                        pstmt = conn.prepareStatement("SELECT DISTINCT academic_session FROM classes ORDER BY academic_session DESC");
+                        rs = pstmt.executeQuery();
+                        while (rs.next()) {
+                            String academicSession = rs.getString("academic_session");
+                            String selected = academicSession.equals(selectedSession) ? "selected" : "";
+                %>
+                <option value="<%= academicSession %>" <%= selected %>><%= academicSession %></option>
+                <%
+                        }
+                    } catch (Exception e) {
+                        out.println("<option>Error: " + e.getMessage() + "</option>");
+                    } finally {
+                        closeResources(conn, pstmt, rs);
+                    }
+                %>
             </select>
             <label for="filterSemester" class="form-label ms-3">Filter by Semester:</label>
             <select id="filterSemester" class="form-control d-inline-block w-auto">
@@ -305,10 +306,7 @@
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
 
         const table = document.getElementById('classesTable');
         const headers = table.querySelectorAll('th[data-sort]');
@@ -319,38 +317,32 @@
                 const rows = Array.from(tbody.querySelectorAll('tr'));
                 const isAscending = header.classList.toggle('sort-asc');
                 rows.sort((a, b) => {
-                    const aText = a.querySelector(`td:nth-child(${Array.from(headers).indexOf(header) + 1})`).textContent.trim();
-                    const bText = b.querySelector(`td:nth-child(${Array.from(headers).indexOf(header) + 1})`).textContent.trim();
+                    const aText = a.cells[Array.from(headers).indexOf(header)].textContent.trim();
+                    const bText = b.cells[Array.from(headers).indexOf(header)].textContent.trim();
                     return isAscending ? aText.localeCompare(bText) : bText.localeCompare(aText);
                 });
-                while (tbody.firstChild) {
-                    tbody.removeChild(tbody.firstChild);
-                }
+                tbody.innerHTML = '';
                 rows.forEach(row => tbody.appendChild(row));
             });
         });
 
-        const filterDay = document.getElementById('filterDay');
-        const filterSession = document.getElementById('filterSession');
-        const filterSemester = document.getElementById('filterSemester');
-        function filterTable() {
-            const dayValue = filterDay.value;
-            const sessionValue = filterSession.value;
-            const semesterValue = filterSemester.value;
-            const rows = table.querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                const day = row.cells[5].textContent.trim();
-                const session = row.cells[6].textContent.trim();
-                const semester = row.cells[7].textContent.trim();
-                const dayMatch = !dayValue || day === dayValue;
-                const sessionMatch = !sessionValue || session === sessionValue;
-                const semesterMatch = !semesterValue || semester === semesterValue;
-                row.style.display = (dayMatch && sessionMatch && semesterMatch) ? '' : 'none';
+        const filters = [
+            { id: 'filterDay', cellIndex: 5 },
+            { id: 'filterSession', cellIndex: 6 },
+            { id: 'filterSemester', cellIndex: 7 }
+        ];
+        filters.forEach(filter => {
+            document.getElementById(filter.id).addEventListener('change', () => {
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const matches = filters.every(f => {
+                        const value = document.getElementById(f.id).value;
+                        return !value || row.cells[f.cellIndex].textContent.trim() === value;
+                    });
+                    row.style.display = matches ? '' : 'none';
+                });
             });
-        }
-        filterDay.addEventListener('change', filterTable);
-        filterSession.addEventListener('change', filterTable);
-        filterSemester.addEventListener('change', filterTable);
+        });
     });
 </script>
 <%@ include file="footer.jsp"%>

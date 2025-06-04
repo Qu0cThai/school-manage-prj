@@ -7,16 +7,13 @@
                 <br/>
                 <div class="container">
                     <p align="justify" style="text-indent: 30px;margin-left: 30px;margin-right: 30px;line-height: 1.5em;">
-                        I am the student of IDB-BISEW. IDB-BISEW stands 
-                        for<b> Islamic Development Bank-Bangladesh Islamic Solidarity Educational Wakf </b>. <br/></p>
+                        We are the student of <b> International University  </b>. <br/></p>
                     <p align="justify" style="text-indent: 30px;margin-left: 30px;margin-right: 30px;line-height: 1.5em;">
-                        They serve the professional IT training course IDB-BISEW Diploma in Enterprise System Analysis &amp; Design with J2EE. 
-                        There are also some other cources under IDB-BISEW. To know more visit 
-                        <a href="http://www.idb-bisew.org" target="_blank"  style="text-decoration: underline;">www.idb-bisew.org</a>.
+                        This is our School Management System Project in Web Development  class. 
                     </p>
                     <p align="justify" style="text-indent: 30px;margin-left: 30px;margin-right: 30px;line-height: 1.5em;">
-                        I am develop this project as my course ending project. I am not Professional. But now I have confident to work as a java programmer.
-                        I am<a href="https://projuktijobs.com/profile_view/366/it_BfQ8MbvPksp8eMbpl5rc"> Mohammad Bin Afsar</a>. Id: 1240689
+                        Here is our GitHub:
+                        <a href="https://github.com/Qu0cThai/school-manage-prj" target="_blank"  style="text-decoration: underline;">https://github.com/Qu0cThai/school-manage-prj</a>. <br/></p>
                 </div>
                 <br/>
             </div>

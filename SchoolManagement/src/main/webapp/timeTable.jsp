@@ -135,11 +135,6 @@
     }
 </style>
 <div class="container mt-4">
-    <!-- Debug Output -->
-    <%
-        out.println("<!-- Debug: userRId = " + (userRId != null ? userRId : "null") + ", u_name = " + (u_name != null ? u_name : "null") + ", userId = " + userId + " -->");
-    %>
-    <!-- Filter Form -->
     <div class="row">
         <div class="col-12">
             <form method="GET" action="timeTable.jsp" class="filter-form">
@@ -190,7 +185,6 @@
             </form>
         </div>
     </div>
-    <!-- Timetable -->
     <div class="row">
         <div class="col-12">
             <div class="table-container">

@@ -37,7 +37,7 @@
         }
     }
 
-    if (u_id == null || u_name == null || userRId == null || (userRId != 1 && userRId != 8)) {
+    if (u_id == null || u_name == null || userRId == null || (userRId != 1)) {
         response.sendRedirect("index.jsp");
         return;
     }
@@ -85,31 +85,28 @@
         background: #4facfe;
         transform: scale(1.05);
     }
-    .btn-secondary, .btn-warning, .btn-danger {
-        transition: all 0.3s ease;
-    }
     .btn-secondary {
         background: linear-gradient(90deg, #ff7e5f, #feb47b);
         border: none;
+        transition: all 0.3s ease;
     }
     .btn-secondary:hover {
         transform: scale(1.05);
-        background: linear-gradient(90deg, #ff7e5f, #feb47b);
     }
     .btn-warning {
         background: linear-gradient(90deg, #ffca28, #ffeb3b);
         border: none;
+        transition: all 0.3s ease;
     }
     .btn-warning:hover {
-        background: linear-gradient(90deg, #ffeb3b, #ffca28);
         transform: scale(1.05);
     }
     .btn-danger {
         background: linear-gradient(90deg, #dc3545, #f44336);
         border: none;
+        transition: all 0.3s ease;
     }
     .btn-danger:hover {
-        background: linear-gradient(90deg, #f44336, #dc3545);
         transform: scale(1.05);
     }
     .table {
@@ -279,11 +276,6 @@
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-
         const table = document.getElementById('noticesTable');
         const headers = table.querySelectorAll('th[data-sort]');
         headers.forEach(header => {
@@ -305,7 +297,6 @@
         });
 
         window.editNotice = function(n_id, title, description, publish_date) {
-            console.log('editNotice called:', { n_id, title, description, publish_date });
             try {
                 document.getElementById('editForm').style.display = 'block';
                 document.getElementById('edit_n_id').value = n_id;
@@ -409,4 +400,3 @@
         }
     }
 %>
-</html>

@@ -6,11 +6,11 @@
     .list-group-item {
         background: #f8f9fa;
         border: none;
-        transition: all 0.3s ease;
+        transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
     }
     .list-group-item:hover {
         background: linear-gradient(90deg, #4facfe, #00f2fe);
-        color: white !important;
+        color: white;
         transform: translateX(5px);
     }
     .sidebar {
@@ -47,12 +47,10 @@
 </style>
 <div class="container mt-4">
     <%        Integer userRId = (Integer) session.getAttribute("userRId");
-        out.println("<!-- Debug: userRId = " + (userRId != null ? userRId : "null") + ", username = " + (username != null ? username : "null") + " -->");
     %>
     <div class="row">
         <%
             if (userRId != null && (userRId == 1 || userRId == 2 || userRId == 3)) {
-                try {
         %>
         <div class="col-12 col-md-3 mb-4">
             <div class="sidebar">
@@ -67,37 +65,12 @@
                     <a href="studentInformation.jsp" class="list-group-item list-group-item-action"><i class="fas fa-user-graduate me-2"></i>Students Information</a>         
                 </div>
                 <%
-                } else if (userRId == 2) { 
-                    Connection conn = null;
-                    Statement stmt = null;
-                    ResultSet rs = null;
-                    int totalStudents = 0, totalTeachers = 0, totalEmployees = 0;
-                    try {
-                        conn = getConnection();
-                        stmt = conn.createStatement();
-                        rs = stmt.executeQuery("SELECT COUNT(*) AS count FROM students");
-                        if (rs.next()) {
-                            totalStudents = rs.getInt("count");
-                        }
-                        rs.close();
-                        rs = stmt.executeQuery("SELECT COUNT(*) AS count FROM teachers");
-                        if (rs.next()) {
-                            totalTeachers = rs.getInt("count");
-                        }
-                        rs.close();
-                        rs = stmt.executeQuery("SELECT COUNT(*) AS count FROM users WHERE r_id NOT IN (2, 3)");
-                        if (rs.next()) {
-                            totalEmployees = rs.getInt("count");
-                        }
-                    } catch (Exception e) {
-                        out.println("<p>Error fetching counts: " + e.getMessage() + "</p>");
-                    } finally {
-                        closeResources(conn, stmt, rs);
-                    }
+                } else if (userRId == 2) {
                 %>
                 <h3 class="text-success">Teacher Dashboard</h3>
                 <div class="list-group">
                     <a href="manageClasses.jsp" class="list-group-item list-group-item-action"><i class="fas fa-chalkboard me-2"></i>Manage Classes</a>
+                    <a href="classes.jsp" class="list-group-item list-group-item-action"><i class="fas fa-chalkboard me-2"></i>Classes</a>
                     <a href="timeTable.jsp" class="list-group-item list-group-item-action"><i class="fas fa-calendar-alt me-2"></i>Timetable</a>
                     <a href="teacherInformation.jsp" class="list-group-item list-group-item-action"><i class="fas fa-user-tie me-2"></i>Teachers Information</a>
                     <a href="studentInformation.jsp" class="list-group-item list-group-item-action"><i class="fas fa-user-graduate me-2"></i>Students Information</a>                            
@@ -118,14 +91,11 @@
             </div>
         </div>
         <%
-                } catch (Exception e) {
-                    out.println("<p>Error rendering sidebar: " + e.getMessage() + "</p>");
-                }
             }
         %>
         <div class="<%= (userRId == null) ? "col-12 col-md-12" : "col-12 col-md-9"%>">
             <div class="notice-board">
-                <button type="button" class="btn btn-secondary btn-lg btn-block">Notice Board</button>
+                <button type="button" class="btn btn-secondary btn-lg w-100">Notice Board</button>
                 <div class="list-group mt-3">
                     <%
                         Connection conn = null;
@@ -160,7 +130,7 @@
                         }
                     %>
                     <a class="list-group-item list-group-item-action text-center" href="noticeBoard.jsp">
-                        <small class="list-group-item list-group-item-action" style="padding-left:0">See More..</small>
+                        <small style="padding-left:0">See More..</small>
                     </a>
                 </div>
             </div>

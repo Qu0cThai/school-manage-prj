@@ -84,6 +84,7 @@
                 <thead class="thead-dark">
                     <tr>
                         <th scope="col">Teacher Name</th>
+                        <th scope="col">Teacher Id</th>
                         <th scope="col">Email</th>
                         <th scope="col">Mobile No</th>
                         <th scope="col">Address</th>
@@ -118,6 +119,7 @@
                     %>
                     <tr>
                         <td><%= t_name != null ? t_name : "-" %></td>
+                        <td><%= t_id != null ? t_id : "-" %></td>
                         <td><%= t_email != null ? t_email : "-" %></td>
                         <td><%= phone_number != null ? phone_number : "-" %></td>
                         <td><%= address != null ? address : "-" %></td>
